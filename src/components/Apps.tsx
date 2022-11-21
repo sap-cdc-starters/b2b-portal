@@ -94,7 +94,7 @@ function App({ app = {
     return (
         <div className="column is-one-fifth-fullhd is-one-quarter-widescreen is-one-third-desktop is-one-third-tablet is-half-mobile">
             <div className="brand-card">
-                <img src="{app.icon}" alt="" />
+                <img src="/img/{{app.icon[0]}}" alt="" />
                 <div className="meta">
                     <h3>{app.name}</h3>
                     <p>{app.info}</p>
