@@ -7,6 +7,16 @@ import { Subject } from "rxjs";
 import {UserInfo} from "./models";
 import * as gigya from "./gigyaAuthService";
 declare type GigyaConfig = object &{app?:string};
+declare global {
+
+    interface Window {
+        gigya: any,
+        onGigyaServiceReady: any
+
+    }
+
+
+}
 export declare type GigyaSdk = (typeof gigya & {
     loaded: true
 } & typeof window.gigya) | { loaded: false };
