@@ -5,15 +5,9 @@
  
  ## Live site
  
-deployed to https://store.eu.dynidp.com/
+deployed to https://b2b.cdcs.site/
 
-login page: https://gigya.login.dynidp.com/pages/login
   
-
-## Scenario
->  Login with gigya idp hosted page
-
-### Gigya setup
 
 
 ## Local development
