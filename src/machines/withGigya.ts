@@ -1,154 +1,68 @@
-import {
-    getAccount,
-    getJwt,
-    logout,
-    performSignin,
-    performSignup, 
-    socialLoginAsync,
-    SocialLoginParams
-} from "../gigya/gigyaAuthMachine";
+import {getAccount, getApps} from "../gigya/gigyaAuthService";
 import {omit} from "lodash/fp";
-import {AuthMachine} from "./authMachine";
+import {AuthMachine, authModel} from "./authMachine";
+import {GigyaSdk, sdk} from "../gigya/provider";
+import {actions, interpret} from "xstate";
+import {loadFromConfig} from "../gigya/engine";
+import {checkIfGigyaLoaded} from "../gigya/dynamic-apikey";
+import * as  config from "../gigya/config/site.json";
+import {Subject} from "rxjs";
+import {gigyaService, loader} from "../gigya/gigyaLoadMachine";
 
-function toMfa(tokenDetails: any) {
-    return {
-    ...{...tokenDetails.sub_id?.sub_id || {}},
-    ...omit('sub_id', tokenDetails || {})    
-    } 
-}
 
-export const withGigya= (authMachine:AuthMachine)=>authMachine.withConfig({
+export const withGigya = (authMachine: AuthMachine) => authMachine.withContext({
+    ...authMachine.context,
+    loader: loader
+}).withConfig({
     services: {
-        performSignup: async (ctx, event) => {
+        loader: (context, event) => loader,
+
+        showLogin: (ctx, event) => {
             const payload = omit("type", event);
-            return await performSignup(payload)
-        },
-        performLogin: async (ctx, event) => {
-            const payload = omit("type", event);
-            const loginMode =ctx.user? "reAuth" : "standard"
-            return await performSignin({...payload, loginMode})
-        },
-        getToken: async (ctx, event) => {
-            const payload = omit("type", event);
-            const idToken = await getJwt(payload);
-            const tokenDetails= decodeJwt(idToken as string);
-
-            const mfaToken = decodeJwt(idToken as string);
-            const forMfa = toMfa(mfaToken);
-            delete  mfaToken.sub_id;
-            delete  mfaToken.amr;
-            delete  mfaToken.email;
-            mfaToken.sub_ids = [forMfa];
-            
-            return { idToken: {raw: idToken, details:tokenDetails}, mfaToken, access_token:btoa(JSON.stringify(mfaToken))   };
-        },
-
-        enrichToken: async (ctx, event) => {
-            const payload = omit("type", event);
-            const idToken = await getJwt(payload);
-            const tokenDetails= decodeJwt(idToken as string); 
-            const mfaToken = ctx.mfaToken;
-            const forMfa = toMfa( decodeJwt(idToken as string));
-            mfaToken.sub_ids = [...mfaToken.sub_ids, forMfa];
-             return { idToken:  {raw: idToken, details:tokenDetails}, mfaToken, access_token:btoa(JSON.stringify(mfaToken)) };
-
-            function decodeJwt(token?:string) {
-
-                return token && token.split && JSON.parse(atob(token.split('.')[1]));
-
-            }  
-         
-
-            
-        },
-        performSocialLogin: async (ctx, event) => {
-            if (event.type === "SOCIAL") {
-                const payload = omit("type", event);
-                const loginMode =ctx.user? "reAuth" :  "standard"
-
-                return await  socialLoginAsync({...payload, loginMode} as SocialLoginParams);
+            const context = omit("service", ctx);
+            const show = async (payload: any) => {
+                const user = await ctx.service.showLoginScreenSet(payload);
+                return {user: {...(user?.userInfo || {}), photo: user?.profile?.photoURL}};
             }
-
+            ctx.service && show({containerID: context.container, ...payload});
+            return ctx.service.$login;
         },
-        getUserProfile: async (ctx, event) => {
+        fetchAccount: (ctx, event) => (send) => {
             const payload = omit("type", event);
-            const user = await getAccount(payload);
-            return {user:{ ...(user?.userInfo || {}),  photo: user?.profile?.photoURL}};
-        },
-        performLogout: async (ctx, event) => {
-            localStorage.removeItem("authState");
-            return await logout();
-        },
-        /*'login-service':loginMachine.withConfig({
-            services:{
-                performSignup: async (ctx, event) => {
-                    const payload = omit("type", event);
-                    return await performSignup(payload)
-                },
-                performLogin: async (ctx, event) => {
-                    const payload = omit("type", event);
-                    const loginMode =ctx.user? "reAuth" : "standard"
-                    return await performSignin({...payload, loginMode})
-                },
-                performSocialLogin: async (ctx, event) => {
-                    if (event.type == "SOCIAL") {
-                        const payload = omit("type", event);
-                        const loginMode =ctx.user? "reAuth" :  "standard"
+            return getAccountAsync(payload)
+                .then(function ({user}) {
 
-                        return await  socialLoginAsync({...payload, loginMode} as SocialLoginParams);
-                    }
-
-                },
-            }
-        })*/
+                    send({type: "ACCOUNT", user})
+                })
+                .catch(function (err) {
+                    send("ACCOUNT_MISSING")
+                })
+        },
+        logout: (ctx, event) => (send) => {
+            ctx.service.logout({callback: () => send({type: "LOGGED_OUT"})})
+               
+        },
     },
+
     actions: {
-        // assignLoginService:assign({
-        //     loginService:(context) => spawn(loginMachine.withConfig({
-        //         services:{
-        //             performSignup: async (ctx, event) => {
-        //                 const payload = omit("type", event);
-        //                 return await performSignup(payload)
-        //             },
-        //             performLogin: async (ctx, event) => {
-        //                 const payload = omit("type", event);
-        //                 const loginMode =ctx.user? "reAuth" : "standard"
-        //                 return await performSignin({...payload, loginMode})
-        //             },
-        //             performSocialLogin: async (ctx, event) => {
-        //                 if (event.type == "SOCIAL") {
-        //                     const payload = omit("type", event);
-        //                     const loginMode =ctx.user? "reAuth" :  "standard"
-        //
-        //                     return await  socialLoginAsync({...payload, loginMode} as SocialLoginParams);
-        //                 }
-        //
-        //             },
-        //         }
-        //     }))
-        // })
-        // onUnauthorizedEntry: async (ctx, event) => {
-        //     if (history.location.pathname !== "/signin") {
-        //         /* istanbul ignore next */
-        //         history.push("/signin");
-        //     }
-        // },
-        // onAuthorizedEntry: async (ctx, event) => {
-        //     if (history.location.pathname === "/signin") {
-        //         /* istanbul ignore next */
-        //         history.push("/");
-        //     } else {
-        //         history.push(
-        //             `/profile`
-        //         );
-        //     }
-        //
-        // },
+        assignService: authModel.assign({
+            service: (_: any, ev: { type: "LOADED", service: any; }) => ev.service
+        })
     }
 });
 
-function decodeJwt(token?:string) {
+async function getAccountAsync(payload: any) {
+    const account = await getAccount(payload);
+    const apps = await getApps(gigyaService.state?.context?.config?.app);
+
+    const user = {...account, ...(account?.profile || {}), photo: account?.profile?.photoURL, apps};
+
+    return {apps, user}
+}
+
+function decodeJwt(token?: string) {
 
     return token && token.split && JSON.parse(atob(token.split('.')[1]));
 
-}  
+}
+

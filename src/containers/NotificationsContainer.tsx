@@ -1,12 +1,13 @@
 import React, {useEffect} from "react";
 import {AnyEventObject, Interpreter, ActionTypes} from "xstate";
-import { Paper, Typography } from "@mui/material";
+import {Button, Paper, Typography ,Icon, FormControlLabel, Slide,Switch, Box} from "@mui/material";
+import { Close } from "@mui/icons-material";
 import makeStyles from '@mui/styles/makeStyles';
 import NotificationList from "../components/NotificationList";
 import {AuthService} from "../machines/authMachine";
 import {NotificationResponseItem, NotificationsEvents, NotificationsService} from "../machines/notificationsMachine";
 import {omit} from "lodash/fp";
-import {useActor} from "@xstate/react";
+import {useActor,useSelector} from "@xstate/react";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
@@ -33,6 +34,7 @@ function generateUniqueID() {
 
 interface NotificationUpdatePayload {
 }
+const loginServiceSelector = (state: any) => state;
 
 const NotificationsContainer: React.FC<Props> = ({authService, notificationsService}) => {
     const classes = useStyles();
@@ -41,12 +43,12 @@ const NotificationsContainer: React.FC<Props> = ({authService, notificationsServ
 
     function getPayload(event: AnyEventObject) {
        return {
-        ...omit( ['type','data'], event),
+        ...omit( ['type','data', 'service', 'loader'], event),
         ...(event.data || {})
 
         };
     }
-  
+
 
 
     function doneDetails(event: AnyEventObject):Partial<NotificationResponseItem >{
@@ -77,15 +79,15 @@ const NotificationsContainer: React.FC<Props> = ({authService, notificationsServ
         return {};
     }
     useEffect(() => {
-        authService.onEvent(event => {
+        authService.subscribe(state => {
             if(!event) return;
-            
+            console.trace();
             sendNotifications({
                 type: "ADD", notification: {
                     id: generateUniqueID(),
-                    title:  event.type.toLowerCase(),
+                    title:  state.value + ':: ' + state.event?.type?.toLowerCase()  ,
                     severity: 'info',
-                    payload: getPayload(event),
+                    payload: getPayload(state.event),
                     ...doneDetails(event),
                     ...errorDetails(event)
                 }
@@ -104,20 +106,38 @@ const NotificationsContainer: React.FC<Props> = ({authService, notificationsServ
     //   })
     // }, [authState]);
 
+    const handleChange = () => {
+        if(notificationsState.matches("visible")){
+            sendNotifications("HIDE");
+        }else {
+            sendNotifications("SHOW");
+        }
+    };
 
     const updateNotification = (payload: NotificationUpdatePayload) => {
     };
+    const checked= notificationsState.matches("visible");
 
     return (
-        <Paper className={classes.paper} >
-            <Typography component="h2" variant="h6" color="primary" gutterBottom>
-                Notifications
-            </Typography>
-            <NotificationList
-                notifications={notificationsState?.context?.notifications!}
-                updateNotification={updateNotification}
+        <Box >
+            <FormControlLabel
+                control={<Switch checked={notificationsState.matches("visible")} onChange={handleChange} />}
+                label="Show logger"
             />
-        </Paper>
+            <Slide direction="up" in={checked} >
+                <Paper className={classes.paper} > 
+                    <Typography component="h2" variant="h6" color="primary" gutterBottom>
+                        Logger
+                    </Typography>
+
+                    <NotificationList
+                        notifications={notificationsState?.context?.notifications!}
+                        updateNotification={updateNotification}
+                    />
+                </Paper>
+            </Slide>
+        </Box>
+ 
     );
 };
 

@@ -29,7 +29,6 @@ export async function performSignup(args: any) {
 
     });
 }
-
 export async function performSignupWithSS(args: any) {
     return new Promise((resolve, reject) => {
 
@@ -53,6 +52,37 @@ export async function performSignupWithSS(args: any) {
                     }
                 },
             })
+
+    });
+}
+
+export async function showLoginScreenSet(args: any):Promise<Account> {
+    return new Promise((resolve, reject) => {
+
+        const onLogin =(r) => {
+            resolve(r)
+        }
+        gigyaWebSDK().accounts.showScreenSet(
+            {
+                screenSet: "Default-RegistrationLogin",
+                startScreen: 'gigya-login-screen',
+                ...args, 
+                onLogin:onLogin,
+                callback: (response) => {
+                    if (response.errorCode === 0) {
+                        resolve(response);
+
+                    }
+                    if (response.errorCode !== 0) {
+                        reject(
+                            `Error during registration: ${response.errorMessage}, ${response.errorDetails}`
+                        );
+                    }
+                },
+            });
+        // gigyaWebSDK().accounts.addEventHandlers({
+        //     onLogin: onLogin,
+        // });
 
     });
 }
@@ -121,7 +151,7 @@ export function getJwt(args) {
 
 
 
-export function getAccount(args): Promise<Account> {
+export function getAccount(args ={}): Promise<Account> {
     return new Promise((resolve, reject) => {
         gigyaWebSDK().accounts.getAccountInfo({
             ...(args || {}),
@@ -136,6 +166,56 @@ export function getAccount(args): Promise<Account> {
             }
         })
     });
+}
+
+
+async function getAssets(appId) {
+
+    return new Promise((resolve, reject) => {
+        gigya.accounts.b2b.auth.getAssets({
+            appId: appId,
+            callback: function (response) {
+                console.log(response);
+                if (response.errorCode === 0) {
+                    resolve(response.allowedAssets);
+
+                }
+                if (response.errorCode !== 0) {
+                    reject(
+                        `Error during registration: ${response.errorMessage}, ${response.errorDetails}`
+                    );
+
+                }
+            }
+        });
+    });
+    //get portal application assets
+
+
+}
+
+export async function getApps(appId) {
+    try {
+
+
+        const assets = await getAssets(appId || config.appId);
+        return assets.filter(a => a.type === 'Portal Applications').map(e => {
+            return {name: e.path, id: e.attributes?.app, ...(e.attributes || {})}
+        })
+    } catch (ex) {
+        console.log(ex);
+        return [{
+            id: "ssd",
+            icon: "img/assets/products/1.svg",
+            name: "Portal Application",
+            info: ex.message,
+            role: "Explorer"
+        }]
+    }
+}
+
+function toApps(response) {
+    return response.allowedAssets.filter(a=> a.type ==='Portal Applications').map(e=> {return {name:e.path, id: e.attributes?.app ,...(e.attributes || {})} });
 }
 
 export type LoginParams = {
