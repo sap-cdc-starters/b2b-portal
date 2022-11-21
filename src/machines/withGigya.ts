@@ -2,6 +2,7 @@ import {getAccount, getApps} from "../gigya/gigyaAuthService";
 import {omit} from "lodash/fp";
 import {AuthMachine, authModel} from "./authMachine";
 import {gigyaService, loader} from "../gigya/gigyaLoadMachine";
+import {send} from "xstate";
 
 
 export const withGigya = (authMachine: AuthMachine) => authMachine.withContext({
@@ -36,15 +37,42 @@ export const withGigya = (authMachine: AuthMachine) => authMachine.withContext({
             ctx.service && show({containerID: context.container, ...payload});
             return ctx.service.$login;
         },
+        fetchAssets:(ctx, event) => (send) => {
+            const payload = omit("type", event);
+            return ctx.service.getAssetsAsync(payload)
+                .then(function ({allowedAssets}:any) {
+ 
+                    send({type: "FETCH.ASSETS.SUCCESS", assets:allowedAssets})
+                })
+                .catch(function (err: any) {
+                    send({type:"FETCH.ASSETS.ERROR", error: err})
+                })
+        },
         fetchAccount: (ctx, event) => (send) => {
             const payload = omit("type", event);
-            return getAccountAsync(payload)
-                .then(function ({user}) {
+             getAccountAsync({include:"groups,organizations,b2b,all", ...payload})
+                .then(function ({user}) { 
+                    send({type: "ACCOUNT", user});
+                    if(user.organizations){
+                        send({type: "ORGANIZATION.FOUND", organizations:user.organizations});
 
-                    send({type: "ACCOUNT", user})
+                    }
                 })
                 .catch(function (err) {
                     send("ACCOUNT_MISSING")
+                })
+        },
+        organizationProvider: (ctx, event) => (send) => {
+            const payload = omit("type", event);     
+            getAccount({include:"groups,organizations,b2b", ...payload} )
+                .then(function (account) {
+                    if(account.organizations){
+                        send({type: "ORGANIZATION.FOUND", organizations:account.organizations});
+
+                    }
+                })
+                .catch(function (err) {
+                    send({type: "FETCH.ORGANIZATION.ERROR", error:err});
                 })
         },
         logout: (ctx, event) => (send) => {
@@ -56,7 +84,9 @@ export const withGigya = (authMachine: AuthMachine) => authMachine.withContext({
     actions: {
         assignService: authModel.assign({
             service: (_: any, ev: { type: "LOADED", service: any; }) => ev.service
-        })
+        }),
+        loggedInEntry:send({type:"FETCH.ORGANIZATION"}),
+        organizationEntry:send({type:"FETCH_ASSETS", app:gigyaService.state?.context?.config?.app})
     }
 });
 

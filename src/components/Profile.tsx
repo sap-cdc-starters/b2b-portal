@@ -41,7 +41,7 @@ const profileSelector = (state: AnyState) => state?.context?.user;
 
 function Profile({authService}: ProfileProps) {
     const classes = useStyles();
-    const {email, loginProvider, nickname, photo} = useSelector(authService, profileSelector) || {};
+    const {email, loginProvider, nickname, photo, organizations, groups} = useSelector(authService, profileSelector) || {};
 
 
     return (
@@ -51,11 +51,12 @@ function Profile({authService}: ProfileProps) {
             </Typography>
             <Avatar src={photo} className={classes.avatar}></Avatar>
             <div
-                className={classes.form}
-
-
+                className={classes.form} 
             >
                 <p>
+                    {JSON.stringify(organizations)}
+                    {JSON.stringify(groups)}
+
                     Welcome back, <span style={{fontWeight: "bold"}}> {nickname}</span>.
                 </p>
                 <p>

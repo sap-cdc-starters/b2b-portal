@@ -64,7 +64,7 @@ function Apps({authService}: ProfileProps) {
                 <List data-test="apps-list">
                     {apps.map((app: App) => (
                         <App
-                            key={app.id}
+                            key={app.name}
                             app={app}
                         />
                     ))}

@@ -18,19 +18,23 @@ export interface Token {
     refresh_token?: string;
     id_token?: string;
 }
-declare type AnyRecord={
-    [key:string]: any
+
+declare type AnyRecord = {
+    [key: string]: any
 }
+
+declare type Error = AnyRecord | any;
 
 export const authModel = createModel(
     {
         user: undefined as User | undefined,
+        assets: undefined as AnyRecord[] | undefined,
         token: undefined as Token | undefined,
         service: undefined as any | undefined,
         container: 'container',
         loader: undefined as any | undefined,
-        error: undefined as any | undefined
-
+        error: undefined as Error | undefined,
+        organizations: undefined as AnyRecord[] | undefined
     },
     {
         events: {
@@ -42,8 +46,14 @@ export const authModel = createModel(
             LOGOUT: (containerID: string) => ({containerID}),
             LOADED: (service: any) => ({service}),
             'ORGANIZATION.REGISTER': (containerID?: string, prefix?: string) => ({containerID, prefix}),
-            'ORGANIZATION.REGISTER.SUCCESS': (organization:AnyRecord) => ({organization}),
-            'ORGANIZATION.REGISTER.ERROR': (error:AnyRecord| any) => ({error}),
+            'ORGANIZATION.REGISTER.SUCCESS': (organization: AnyRecord) => ({organization}),
+            'ORGANIZATION.REGISTER.ERROR': (error: AnyRecord | any) => ({error}),
+            'FETCH_ASSETS': (appId?: string) => ({appId}),
+            'FETCH.ASSETS.SUCCESS': (assets: AnyRecord[] | any) => ({assets}),
+            'FETCH.ASSETS.ERROR': (error: AnyRecord | any) => ({error}),
+            'FETCH.ORGANIZATION': (organizations: AnyRecord[] | any) => ({organizations}),
+            'ORGANIZATION.FOUND': (organizations: AnyRecord | any) => ({organizations}),
+            'FETCH.ORGANIZATION.ERROR': (error: AnyRecord | any) => ({error}),
 
         },
     }
@@ -55,8 +65,8 @@ export const authMachine = authModel.createMachine(
         context: authModel.initialContext,
         initial: "loading",
         on: {
-            'ORGANIZATION.REGISTER':{
-                target:'organization'
+            'ORGANIZATION.REGISTER': {
+                target: 'organization'
             },
             LOGIN: {
                 target: "login"
@@ -98,22 +108,22 @@ export const authMachine = authModel.createMachine(
                 }
             },
 
-            organization:{
+            organization: {
                 invoke: {
                     id: "organization-register",
                     src: 'registerOrganization',
-             
+
                 },
-                on:{
-                    "ORGANIZATION.REGISTER.SUCCESS":{
+                on: {
+                    "ORGANIZATION.REGISTER.SUCCESS": {
                         target: 'checkingAccount'
                     },
-                    "ORGANIZATION.REGISTER.ERROR":{
-                        actions:['assignError']
+                    "ORGANIZATION.REGISTER.ERROR": {
+                        actions: ['assignError']
                     }
                 },
-             
-             },
+
+            },
             checkingAccount: {
                 invoke: {
                     id: "authMachine-fetch",
@@ -140,12 +150,97 @@ export const authMachine = authModel.createMachine(
                     },
                 },
             },
+
             loggedIn: {
+                entry: 'loggedInEntry',
                 on: {
+                    "FETCH.ORGANIZATION": {
+                        target: '.fetchOrganization'
+                    },
+                    "ORGANIZATION.FOUND": {
+                        target: ".withOrganization",
+                        actions: [
+                            authModel.assign({
+                                organizations: (_, ev) => ev.organizations,
+                            }),
+                        ],
+                    },
                     LOGOUT: {
                         target: 'logout'
                     }
-                }
+                },
+                states:
+                    {
+                        fetchOrganization: {
+                            invoke: {
+                                id: "authMachine-fetchOrganization",
+                                src: "organizationProvider",
+                            },
+                            on: {
+                                "ORGANIZATION.FOUND": {
+                                    target: "withOrganization",
+                                    actions: [
+                                        authModel.assign({
+                                            organizations: (_, ev) => ev.organizations,
+                                        }),
+                                    ],
+                                },
+                                "FETCH.ORGANIZATION.ERROR": {
+                                    target: 'noOrganization',
+                                    actions: [
+                                        authModel.assign({
+                                            organizations: (_, ev) => [],
+                                            error: (_: any, ev: { error: Error }) => ev.error
+                                        }),
+
+
+                                    ],
+                                },
+                            },
+                        },
+                        withOrganization: {
+                            entry: "organizationEntry",
+                            on: {
+                                "FETCH_ASSETS": {
+                                    target: 'fetchAssets'
+                                }
+
+
+                            }},
+                        noOrganization: {},
+
+                        fetchAssets: {
+                            invoke: {
+                                id: "authMachine-fetchAssets",
+                                src: "fetchAssets",
+                            },
+                            on: {
+                                "FETCH.ASSETS.SUCCESS": {
+                                    target: "withAssets",
+                                    actions: [
+                                        authModel.assign({
+                                            assets: (_, ev) => ev.assets,
+                                        }),
+                                    ],
+                                },
+                                "FETCH.ASSETS.ERROR": {
+                                    target: "noAssets",
+                                    actions: [
+                                        authModel.assign({
+                                            error: (_: any, ev: any) => ev.error,
+                                            assets: (_, ev) => [],
+                                        }),
+                                    ],
+                                },
+
+                            },
+                        },
+                      
+                        withAssets: {},
+                        noAssets: {}
+                    },
+
+
             },
             loggedOut: {
 

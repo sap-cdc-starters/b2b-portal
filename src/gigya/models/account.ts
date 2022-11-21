@@ -167,6 +167,7 @@ export interface Data extends AnyRecord
         status: string;
         operation: string;
         email: string;
+        organizations: AnyRecord[];
     }
 
 

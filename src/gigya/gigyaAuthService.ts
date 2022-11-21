@@ -210,8 +210,8 @@ export function getJwt(args) {
 export function getAccount(args ={}): Promise<Account> {
     return new Promise((resolve, reject) => {
         gigyaWebSDK().accounts.getAccountInfo({
-            ...(args || {}),
             include: "all",
+            ...(args || {}),
             callback: function (res) {
                 if (res.errorCode === 0) {
                     resolve(res)
@@ -225,7 +225,7 @@ export function getAccount(args ={}): Promise<Account> {
 }
 
 
-async function getAssets(appId) {
+export async function getAssetsAsync(appId) {
 
     return new Promise((resolve, reject) => {
         gigya.accounts.b2b.auth.getAssets({
@@ -233,12 +233,12 @@ async function getAssets(appId) {
             callback: function (response) {
                 console.log(response);
                 if (response.errorCode === 0) {
-                    resolve(response.allowedAssets);
+                    resolve(response);
 
                 }
                 if (response.errorCode !== 0) {
                     reject(
-                        `Error during registration: ${response.errorMessage}, ${response.errorDetails}`
+                        `Error during get assets: ${response.errorMessage}, ${response.errorDetails}`
                     );
 
                 }
@@ -254,8 +254,8 @@ export async function getApps(appId) {
     try {
 
 
-        const assets = await getAssets(appId || config.appId);
-        return assets.filter(a => a.type === 'Portal Applications').map(e => {
+        const {allowedAssets} = await getAssetsAsync(appId || config.appId);
+        return allowedAssets.filter(a => a.type === 'Portal Applications').map(e => {
             return {name: e.path, id: e.attributes?.app, ...(e.attributes || {})}
         })
     } catch (ex) {

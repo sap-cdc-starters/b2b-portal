@@ -52,7 +52,7 @@ const NotificationsContainer: React.FC<Props> = ({authService, notificationsServ
 
 
     function doneDetails(event: AnyEventObject):Partial<NotificationResponseItem >{
-        if(event.type.indexOf('DONE.') > 0){
+        if(event.type.indexOf('DONE.') > 0 || event.type.indexOf('.SUCCESS') > 0){
             const title=  `done: ${event.type.replace('DONE.INVOKE.' , '').replace(':INVOCATION[0]' , '')}`
             return {
                 severity: 'success',
@@ -63,7 +63,7 @@ const NotificationsContainer: React.FC<Props> = ({authService, notificationsServ
         return {};
     }
     function errorDetails(event: AnyEventObject):Partial<NotificationResponseItem >{
-        if(event.type.indexOf('ERROR.') > 0){
+        if(event.type.indexOf('ERROR.') > 0  || event.type.indexOf('.ERROR') > 0){
             const title= `${event.type.toLowerCase()
                 .replace(ActionTypes.ErrorCommunication , 'communication error: ')
                 .replace(ActionTypes.ErrorExecution, 'execution error: ')
@@ -80,16 +80,16 @@ const NotificationsContainer: React.FC<Props> = ({authService, notificationsServ
     }
     useEffect(() => {
         authService.subscribe(state => {
-            if(!event) return;
-            console.trace();
+            if(!state) return; 
+            console.log(state);
             sendNotifications({
                 type: "ADD", notification: {
                     id: generateUniqueID(),
-                    title:  state.value + ':: ' + state.event?.type?.toLowerCase()  ,
+                    title:   state.event?.type?.toLowerCase()  ,
                     severity: 'info',
-                    payload: getPayload(state.event),
-                    ...doneDetails(event),
-                    ...errorDetails(event)
+                    payload: getPayload(state.event || state.context),
+                    ...doneDetails(state.event|| state.context),
+                    ...errorDetails(state.event|| state.context)
                 }
             })
         })
