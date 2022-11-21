@@ -239,9 +239,10 @@ export function getJwt(args) {
 
 export function getAccount(args ={}): Promise<Account> {
     return new Promise((resolve, reject) => {
-        gigyaWebSDK().accounts.getAccountInfo({
+        gigyaWebSDK().accounts.getAccountInfo({  
+            include: "groups, profile, *",
+
             ...(args || {}),
-            include: "all",
             callback: function (res) {
                 if (res.errorCode === 0) {
                     resolve(res)

@@ -41,7 +41,7 @@ const profileSelector = (state: AnyState) => state?.context?.user;
 
 function Profile({authService}: ProfileProps) {
     const classes = useStyles();
-    const {email, loginProvider, nickname, photo} = useSelector(authService, profileSelector) || {};
+    const {email, loginProvider, nickname, photo, organization} = useSelector(authService, profileSelector) || {};
 
 
     return (
@@ -63,10 +63,10 @@ function Profile({authService}: ProfileProps) {
                     <span style={{fontWeight: "bold"}}> {email}</span>.
                 </p>
                 {/* Switch statement here based on loginProvider */}
-                <p>
-                    and logged in using the provider:
-                    <span style={{fontWeight: "bold"}}> {loginProvider}</span>.
-                </p>
+                {organization && <p>
+                    to Organiztion
+                    <span style={{fontWeight: "bold"}}> {organization?.orgName}</span>.
+                </p>}
 
             </div>
 

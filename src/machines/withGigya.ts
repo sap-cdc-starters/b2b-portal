@@ -103,8 +103,9 @@ export const withGigya = (authMachine: AuthMachine) => authMachine.withContext({
 async function getAccountAsync(payload: any) {
     const account = await getAccount(payload);
     const apps = await getApps(gigyaService.state?.context?.config?.app);
+    const organizations=account?.groups?.organizations || [];
 
-    const user = {...account, ...(account?.profile || {}), photo: account?.profile?.photoURL, apps};
+    const user = {...account, ...(account?.profile || {}), photo: account?.profile?.photoURL, apps, organization:organizations.pop()};
 
     return {apps, user}
 }
