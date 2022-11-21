@@ -1,12 +1,6 @@
 import {getAccount, getApps} from "../gigya/gigyaAuthService";
 import {omit} from "lodash/fp";
 import {AuthMachine, authModel} from "./authMachine";
-import {GigyaSdk, sdk} from "../gigya/provider";
-import {actions, interpret} from "xstate";
-import {loadFromConfig} from "../gigya/engine";
-import {checkIfGigyaLoaded} from "../gigya/dynamic-apikey";
-import * as  config from "../gigya/config/site.json";
-import {Subject} from "rxjs";
 import {gigyaService, loader} from "../gigya/gigyaLoadMachine";
 
 
