@@ -1,9 +1,9 @@
 import React from "react";
 import makeStyles from '@mui/styles/makeStyles';
-import {RouteComponentProps} from "@reach/router";
-import {AuthService} from "../machines/authMachine";
-import {AnyState} from "xstate";
-import {Box} from "@mui/material";
+import { RouteComponentProps } from "@reach/router";
+import { AuthService } from "../machines/authMachine";
+import { AnyState } from "xstate";
+import { Box } from "@mui/material";
 import SessionInfo from "../components/Session";
 import Profile from "../components/Profile";
 import Apps from "../components/Apps";
@@ -44,7 +44,7 @@ const useStyles = makeStyles((theme) => ({
         flexWrap: 'wrap',
         flexDirection: "row",
         margin: theme.spacing(2),
-        justifyContent:"space-evenly"
+        justifyContent: "space-evenly"
     },
     stackItem: {
         flexShrink: 1  /* default 1 */
@@ -59,29 +59,29 @@ export interface ProfileProps extends RouteComponentProps {
 
 const profileSelector = (state: AnyState) => state?.context?.user;
 
-function ProfileContainer({authService}: ProfileProps) {
+function ProfileContainer({ authService }: ProfileProps) {
     const classes = useStyles();
 
 
     return (
-    <Box
-        sx={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            flexDirection:"column"
-        }}
-    >
-        
-            <div className={classes.stackItem}>
-                <Profile authService={authService}/>
-            </div>
-            <div className={classes.stackItem}>
-                <Apps authService={authService}/>
-            </div>
-    
+        <Box
+            sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                flexDirection: "column"
+            }}
+        >
 
-
-    </Box>
+            <div className="shop-header">
+                <div className="container">
+                    <Profile authService={authService} />
+                </div></div>
+            <div className="store-sections">
+                <div className="container">
+                    <Apps authService={authService} />
+                </div>
+            </div>
+        </Box>
     );
 }
 
