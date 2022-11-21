@@ -18,8 +18,9 @@ export interface Token {
     refresh_token?: string;
     id_token?: string;
 }
-declare type AnyRecord={
-    [key:string]: any
+
+declare type AnyRecord = {
+    [key: string]: any
 }
 
 export const authModel = createModel(
@@ -41,9 +42,10 @@ export const authModel = createModel(
             LOGIN: (containerID: string) => ({containerID}),
             LOGOUT: (containerID: string) => ({containerID}),
             LOADED: (service: any) => ({service}),
+            ERROR: (error: AnyRecord | any) => ({error}),
             'ORGANIZATION.REGISTER': (containerID?: string, prefix?: string) => ({containerID, prefix}),
-            'ORGANIZATION.REGISTER.SUCCESS': (organization:AnyRecord) => ({organization}),
-            'ORGANIZATION.REGISTER.ERROR': (error:AnyRecord| any) => ({error}),
+            'ORGANIZATION.REGISTER.SUCCESS': (organization: AnyRecord) => ({organization}),
+            'ORGANIZATION.REGISTER.ERROR': (error: AnyRecord | any) => ({error}),
 
         },
     }
@@ -55,8 +57,11 @@ export const authMachine = authModel.createMachine(
         context: authModel.initialContext,
         initial: "loading",
         on: {
-            'ORGANIZATION.REGISTER':{
-                target:'organization'
+            'ORGANIZATION.REGISTER': {
+                target: 'organization'
+            },
+            ERROR: {
+                actions: ["assignError"]
             },
             LOGIN: {
                 target: "login"
@@ -98,22 +103,22 @@ export const authMachine = authModel.createMachine(
                 }
             },
 
-            organization:{
+            organization: {
                 invoke: {
                     id: "organization-register",
                     src: 'registerOrganization',
-             
+
                 },
-                on:{
-                    "ORGANIZATION.REGISTER.SUCCESS":{
+                on: {
+                    "ORGANIZATION.REGISTER.SUCCESS": {
                         target: 'checkingAccount'
                     },
-                    "ORGANIZATION.REGISTER.ERROR":{
-                        actions:['assignError']
+                    "ORGANIZATION.REGISTER.ERROR": {
+                        actions: ['assignError']
                     }
                 },
-             
-             },
+
+            },
             checkingAccount: {
                 invoke: {
                     id: "authMachine-fetch",
@@ -148,24 +153,57 @@ export const authMachine = authModel.createMachine(
                 }
             },
             loggedOut: {
-
                 entry: [
                     authModel.assign({
-                        user: (_, ev) => undefined,
-                    }),
-                    send({
-                        type: "LOGIN",
+                        user: (_, ev) => undefined
+                    })
+                ], 
+                on: {
+                    '': [
+                        {
+                            cond: 'isInvite', actions: send({
+                                type: "LOGIN",
+                                screenSet: "Default-RegistrationLogin",
+                                startScreen: "invite",
+                                ctx: "invite"
+
+                            }), target: "#login"
+                        },
+                        {
+                            cond: 'isSignup', actions: send({
+                                type: "LOGIN",
+                                screenSet: "Default-RegistrationLogin",
+                                ctx: "signup"
+
+                            }), target: "#login"
+                        },
+                        {
+                            cond: 'isLogin', actions: send({
+                                type: "LOGIN",
+                                screenSet: "Default-RegistrationLogin",
+                                startScreen: "gigya-login-screen",
+                                ctx: "login"
+                            }), target: "#login"
+                        }
+                    ]
+                }
 
 
-                    })]
             },
             login: {
+                id: "login",
                 invoke: {
-                    id: "authMachine-login",
+                    id: "authMachine-signin",
                     src: "showLogin",
+                    data: {
+                        screenSet: (ctx: any, ev: any) => ev.screenSet || "Default-RegistrationLogin",
+                        startScreen: (ctx: any, ev: any, meta:any) => ev.startScreen|| "gigya-login-screen",
+                        ctx: (ctx: any, ev: any, meta:any) => ev.ctx||  "default-login",
 
+                    },
+                } 
+                
 
-                },
 
             },
             logout: {
@@ -190,6 +228,12 @@ export const authMachine = authModel.createMachine(
             assignError: authModel.assign({
                 error: (_: any, ev: { error: any; }) => ev.error
             }),
+        },
+        guards: {
+            isInvite: (_, _ev) => window && window.location.hash == "#invite",
+            isSignup: (_, _ev) => window && window.location.hash == "#signup",
+            isLogin: (_, _ev) => true
+
         }
     }
 )

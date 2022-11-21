@@ -1,7 +1,7 @@
 // @ts-nocheck - may need to be at the start of file
 import gigyaWebSDK from "./gigyaWebSDK";
 import {SocialPayload} from "../machines/authMachine";
-import {Account} from "./models";
+import {Account, ErrorEventHandler, IErrorEvent} from "./models";
 
 // @ts-ignore
 
@@ -56,7 +56,9 @@ export async function performSignupWithSS(args: any) {
     });
 }
 
-export async function showLoginScreenSet(args: any):Promise<Account> {
+
+
+export async function showLoginScreenSetAsync(args: any):Promise<Account> {
     return new Promise((resolve, reject) => {
 
         const onLogin =(r) => {
@@ -85,6 +87,34 @@ export async function showLoginScreenSet(args: any):Promise<Account> {
         // });
 
     });
+}
+export  function showLoginScreenSet(args: any, cb?: (account:Account)=> {}, error?: IErrorEvent ):void {
+    const onLogin =(r) => {
+        cb && cb(r)
+    }; 
+    gigyaWebSDK().accounts.showScreenSet(
+            {
+                screenSet: "Default-RegistrationLogin",
+                startScreen: 'gigya-login-screen',
+                ...args,
+                onLogin:onLogin,
+                callback: (response) => {
+                    if (response.errorCode === 0) {
+                        cb &&  cb(response);
+
+                    }
+                    if (response.errorCode !== 0) {
+                        error && error(
+                            `Error during registration: ${response.errorMessage}, ${response.errorDetails}`
+                        );
+                    }
+                },
+            });
+        // gigyaWebSDK().accounts.addEventHandlers({
+        //     onLogin: onLogin,
+        // });
+
+   
 }
 function openDelegatedAdmin() {
     gigya.accounts.b2b.openDelegatedAdminLogin({orgId:getCookie('orgId')});

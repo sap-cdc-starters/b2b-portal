@@ -80,16 +80,16 @@ const NotificationsContainer: React.FC<Props> = ({authService, notificationsServ
     }
     useEffect(() => {
         authService.subscribe(state => {
-            if(!event) return;
-            console.trace();
+            if(!state) return;
+            console.log(state);
             sendNotifications({
                 type: "ADD", notification: {
                     id: generateUniqueID(),
                     title:  state.value + ':: ' + state.event?.type?.toLowerCase()  ,
                     severity: 'info',
                     payload: getPayload(state.event),
-                    ...doneDetails(event),
-                    ...errorDetails(event)
+                    ...doneDetails(state.event),
+                    ...errorDetails(state.event)
                 }
             })
         })

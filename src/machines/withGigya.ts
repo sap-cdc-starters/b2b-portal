@@ -14,42 +14,82 @@ export const withGigya = (authMachine: AuthMachine) => authMachine.withContext({
             const payload = omit("type", event);
             const context = omit("service", ctx);
             const show = async (payload: any) => {
-                try{
-                    const response=await ctx.service.showScreenSetAsync(payload);
-                    send({type: "ORGANIZATION.REGISTER.SUCCESS", organization:response});
+                try {
+                    const response = await ctx.service.showScreenSetAsync(payload);
+                    send({type: "ORGANIZATION.REGISTER.SUCCESS", organization: response});
 
-                }
-                catch (e) {
-                    send({type: "ORGANIZATION.REGISTER.ERROR", error:e});
+                } catch (e) {
+                    send({type: "ORGANIZATION.REGISTER.ERROR", error: e});
                 }
             }
             // @ts-ignore
-            return show({containerID: context.container,screenSet: `${event.prefix || 'Default'}-OrganizationRegistration` , ...payload})                ;
+            return show({
+                containerID: context.container,
+                screenSet: `Default-OrganizationRegistration`, ...payload
+            });
         },
-        showLogin: (ctx, event) => {
+        showLogin: (ctx, event, {data, src, meta}) => {
+            const payload = omit("type", event);
+            const context = omit("service", ctx); 
+            const args={containerID: context.container, ...payload, ...data}; 
+            ctx.service &&  ctx.service.showLoginScreenSetAsync(args);
+            return ctx.service.$login;
+        },
+        showLoginCallback: (ctx, event, {data, src, meta}) => (send)=>{
             const payload = omit("type", event);
             const context = omit("service", ctx);
-            const show = async (payload: any) => {
-                const user = await ctx.service.showLoginScreenSet(payload);
-                return {user: {...(user?.userInfo || {}), photo: user?.profile?.photoURL}};
+            if(!ctx.service){
+                send({type:"ERROR",  error:"Pending gigya load"});
+                return ;
             }
-            ctx.service && show({containerID: context.container, ...payload});
-            return ctx.service.$login;
+          
+            const args={containerID: context.container, ...payload, ...data};
+            ctx.service.accounts.showScreenSet(
+                {
+                    screenSet: "Default-RegistrationLogin",
+                    startScreen: 'gigya-login-screen',
+                    ...args,
+                    onError: (e:any)=> send({type:"ERROR",  error:e}),
+                    OnLogin: (e:any)=> send({type:"LOGGED_IN",  user: e})
+                });
+          
+            return ()=>{};
         },
         fetchAccount: (ctx, event) => (send) => {
             const payload = omit("type", event);
             return getAccountAsync(payload)
-                .then(function ({user}) {
-
+                .then(function ({user}) { 
                     send({type: "ACCOUNT", user})
                 })
                 .catch(function (err) {
                     send("ACCOUNT_MISSING")
                 })
         },
+        fetchAccountCallback:  (ctx, event) => (callback, onReceive) => {
+            // This will send the 'INC' event to the parent every second
+            const args = omit("type", event);
+            ctx.service.accounts.getAccountInfo({
+                ...(args || {}),
+                include: "all",
+                callback: function (res:any) {
+                    if (res.errorCode === 0) {
+                        const user = {...res, ...(res?.profile || {}), photo: res?.profile?.photoURL};
+
+                        callback({type: "ACCOUNT", user})
+
+                    } else {
+                        callback("ACCOUNT_MISSING")                    }
+
+                }
+            });
+            // Perform cleanup
+            return () => {};
+      
+           
+        },
         logout: (ctx, event) => (send) => {
             ctx.service.logout({callback: () => send({type: "LOGGED_OUT"})})
-               
+
         },
     },
 
