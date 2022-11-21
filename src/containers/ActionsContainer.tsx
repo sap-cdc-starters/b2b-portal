@@ -1,5 +1,5 @@
-import React, {useEffect} from "react";
-import {AnyEventObject, AnyState, Interpreter, PayloadSender, StateLike, StateNode, TransitionDefinition} from "xstate";
+import React, { useEffect } from "react";
+import { AnyEventObject, AnyState, Interpreter, PayloadSender, StateLike, StateNode, TransitionDefinition } from "xstate";
 import {
     Button,
     List,
@@ -17,16 +17,16 @@ import {
     Icon
 } from "@mui/material";
 import makeStyles from '@mui/styles/makeStyles';
-import {AuthService} from "../machines/authMachine";
-import {useActor} from "@xstate/react";
-import {EventObject, Sender} from "xstate/lib/types";
-import {MailOutline, LoginOutlined} from "@mui/icons-material"
+import { AuthService } from "../machines/authMachine";
+import { useActor } from "@xstate/react";
+import { EventObject, Sender } from "xstate/lib/types";
+import { MailOutline, LoginOutlined } from "@mui/icons-material"
 import IconButton from '@mui/material/IconButton';
-import {NotificationsService} from "../machines/notificationsMachine";
+import { NotificationsService } from "../machines/notificationsMachine";
 
 declare module '@mui/styles/defaultTheme' {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface DefaultTheme extends Theme {}
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface DefaultTheme extends Theme { }
 }
 
 
@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
     typography: {
         h5: {
             font: 'mono',
-            fontStyle:'bold',
+            fontStyle: 'bold',
             fontWeight: 'bold'
         }
     },
@@ -53,58 +53,57 @@ export interface Props {
     notificationsService: NotificationsService;
 }
 
-const EventsContainer: React.FC<Props> = ({authService, notificationsService}) => {
+const EventsContainer: React.FC<Props> = ({ authService, notificationsService }) => {
     const classes = useStyles();
     const [authState] = useActor(authService);
- 
+
     const sendEvent = authService.send;
     let theme = createTheme({
         typography: {
             h5: {
-              font: 'mono',
-                fontStyle:'bold',
-                fontWeight: 'bold' 
+                font: 'mono',
+                fontStyle: 'bold',
+                fontWeight: 'bold'
             }
         },
     });
     theme = responsiveFontSizes(theme);
-    const events:Array<{type:string, icon:string, info: string}>=  [{
+    const events: Array<{ type: string, icon: string, info: string }> = [{
         type: "LOGIN",
-        icon : 'login',
+        icon: 'login',
         info: 'Login!',
     },
-        {
-            type: "LOGOUT",
-            icon : 'logout',
-            info: 'Logout'
-        },
-        {
-            type: "ORGANIZATION.REGISTER",
-            icon : 'mail',
-            info: 'Register new organization'
-        }];
+    {
+        type: "LOGOUT",
+        icon: 'logout',
+        info: 'Logout'
+    },
+    {
+        type: "ORGANIZATION.REGISTER",
+        icon: 'mail',
+        info: 'Register new organization'
+    }];
     return (
-        // <div className="bg-white max-w-7xl mx-auto px-4 sm:px-6">
-        <AppBar color="transparent" variant={"outlined"} position="sticky">
-            <Box sx={{display: 'flex', alignItems: 'center', textAlign: 'center'}}>
-                {/*<div*/}
-                {/*    className="flex justify-between items-center border-b-2 border-gray-100 py-6 md:justify-start md:space-x-10">*/}
-                
- 
-                        { 
-                           events .map(({type, icon, info}) => {
+
+        <div id="main-navbar" className="navbar mobile-navbar is-inline-flex is-not-transparent is-mobile no-shadow">
+            <div className="container is-fluid">
+                <div className="navbar-brand">
+                    <a href="/cdc-starter-kit/" className="navbar-item hint--bottom hint--bounce hint--infoo hint--rounded " aria-label="Goto Home">
+                        <img className="menu-pic site-logo" src="/img/sap.png" width="150" style={{ float: "none" }} alt="{{Title}}" />
+                        <h5 className="menu-description is-size-5 has-text-weight-bold">CDC Starter Kit</h5>
+                    </a>
+                    <div className="navbar-start logged">
+
+                        {
+                            events.map(({ type, icon, info }) => {
                                 return (
-                                    <Event key={type} state={authState} send={sendEvent} type={type} icon={icon} info={info}/>
+                                    <Event key={type} state={authState} send={sendEvent} type={type} icon={icon} info={info} />
                                 );
                             })}
-                        
-{/*
-                        <Event type={"SHOW"} state={notificationsService.state} send={notificationsService.send} icon={'log'} info={'Show Logger'}/>
-                        <Event type={"HIDE"} state={notificationsService.state} send={notificationsService.send} icon={'remove'} info={'Hide Logger'}/>
-
-*/}
-              </Box>
-        </AppBar>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 };
 
@@ -112,7 +111,7 @@ export const Event = (props: { type: string, state: AnyState, send: PayloadSende
     // const {flyJson} = useFlyPane(); 
     const classes = useStyles();
 
-    const {state, send, type, info, icon} = props;
+    const { state, send, type, info, icon } = props;
     const defaultEvent = state.meta?.eventPayloads?.[type] || {};
     // const eventData = {
     //     ...defaultEvent,
@@ -122,29 +121,24 @@ export const Event = (props: { type: string, state: AnyState, send: PayloadSende
 
 
     return (
-        <div className="navbar-item is-icon drop-trigger">
 
-        <Button
-            className="icon-link is-active hint--bottom hint--bounce hint--infoo hint--medium hint--rounded " 
-            aria-label={info}
-            onClick={() => {
-                // flyJson(eventData, eventData.Type);
-                send({
-                    ...defaultEvent,
-                    // ...event,
-                    type: type,
-                });
-            }}
-            // To override prose
-            style={{margin: 2}}    
-        >
-            <a className="icon-link is-active hint--bottom hint--bounce hint--infoo hint--medium hint--rounded " >
+        <div className="navbar-item is-icon drop-trigger">
+            <a className="icon-link is-primary hint--bottom hint--bounce hint--infoo hint--rounded " aria-label={info} href="#"
+                onClick={() => {
+                    // flyJson(eventData, eventData.Type);
+                    send({
+                        ...defaultEvent,
+                        // ...event,
+                        type: type,
+                    });
+                }}>
                 <Icon baseClassName="material-icons material-icons-outlined">{icon}</Icon>
-                <span className="indicator"></span>
             </a>
 
-        </Button>
         </div>
+
+
+
 
 
     );
