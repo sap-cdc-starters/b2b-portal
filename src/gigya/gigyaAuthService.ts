@@ -66,9 +66,65 @@ export async function showLoginScreenSet(args: any):Promise<Account> {
             {
                 screenSet: "Default-RegistrationLogin",
                 startScreen: 'gigya-login-screen',
-                ...args, 
+                ...args,
                 onLogin:onLogin,
                 callback: (response) => {
+                    if (response.errorCode === 0) {
+                        resolve(response);
+
+                    }
+                    if (response.errorCode !== 0) {
+                        reject(
+                            `Error during registration: ${response.errorMessage}, ${response.errorDetails}`
+                        );
+                    }
+                },
+            });
+        // gigyaWebSDK().accounts.addEventHandlers({
+        //     onLogin: onLogin,
+        // });
+
+    });
+}
+function openDelegatedAdmin() {
+    gigya.accounts.b2b.openDelegatedAdminLogin({orgId:getCookie('orgId')});
+}
+
+
+function showSelfRegistration() {
+    var params = {
+        screenSet: "Default-OrganizationRegistration",
+        containerID: "div",
+        onAfterSubmit: showResponse
+
+    };
+    gigya.accounts.showScreenSet(params);
+
+    function showResponse(eventObj) {
+        if (eventObj.response.errorCode == 0) {
+            document.getElementById('div').innerHTML = "<center> Request submitted</center>";
+        }
+    }
+}
+
+export async function showScreenSetAsync(args: any):Promise<Account> {
+    return new Promise((resolve, reject) => {
+ 
+        gigyaWebSDK().accounts.showScreenSet(
+            {
+                 ...args,
+                onAfterSubmit: (response) => {
+                    if (response.errorCode === 0) {
+                        resolve(response);
+
+                    }
+                    if (response.errorCode !== 0) {
+                        reject(
+                            `Error during registration: ${response.errorMessage}, ${response.errorDetails}`
+                        );
+                    }
+                },
+                 callback: (response) => {
                     if (response.errorCode === 0) {
                         resolve(response);
 

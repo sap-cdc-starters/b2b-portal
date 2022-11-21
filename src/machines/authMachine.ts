@@ -18,7 +18,9 @@ export interface Token {
     refresh_token?: string;
     id_token?: string;
 }
-
+declare type AnyRecord={
+    [key:string]: any
+}
 
 export const authModel = createModel(
     {
@@ -26,7 +28,8 @@ export const authModel = createModel(
         token: undefined as Token | undefined,
         service: undefined as any | undefined,
         container: 'container',
-        loader: undefined as any | undefined
+        loader: undefined as any | undefined,
+        error: undefined as any | undefined
 
     },
     {
@@ -37,7 +40,10 @@ export const authModel = createModel(
             ACCOUNT_MISSING: () => ({}),
             LOGIN: (containerID: string) => ({containerID}),
             LOGOUT: (containerID: string) => ({containerID}),
-            LOADED: (service: any) => ({service})
+            LOADED: (service: any) => ({service}),
+            'ORGANIZATION.REGISTER': (containerID?: string, prefix?: string) => ({containerID, prefix}),
+            'ORGANIZATION.REGISTER.SUCCESS': (organization:AnyRecord) => ({organization}),
+            'ORGANIZATION.REGISTER.ERROR': (error:AnyRecord| any) => ({error}),
 
         },
     }
@@ -49,6 +55,9 @@ export const authMachine = authModel.createMachine(
         context: authModel.initialContext,
         initial: "loading",
         on: {
+            'ORGANIZATION.REGISTER':{
+                target:'organization'
+            },
             LOGIN: {
                 target: "login"
             },
@@ -89,6 +98,22 @@ export const authMachine = authModel.createMachine(
                 }
             },
 
+            organization:{
+                invoke: {
+                    id: "organization-register",
+                    src: 'registerOrganization',
+             
+                },
+                on:{
+                    "ORGANIZATION.REGISTER.SUCCESS":{
+                        target: 'checkingAccount'
+                    },
+                    "ORGANIZATION.REGISTER.ERROR":{
+                        actions:['assignError']
+                    }
+                },
+             
+             },
             checkingAccount: {
                 invoke: {
                     id: "authMachine-fetch",
@@ -161,6 +186,9 @@ export const authMachine = authModel.createMachine(
             }),
             assignServiceFromData: authModel.assign({
                 service: (_: any, ev: { data: { service: any; }; }) => ev.data.service
+            }),
+            assignError: authModel.assign({
+                error: (_: any, ev: { error: any; }) => ev.error
             }),
         }
     }

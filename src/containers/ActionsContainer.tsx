@@ -90,8 +90,6 @@ const EventsContainer: React.FC<Props> = ({authService, notificationsService}) =
                 {/*<div*/}
                 {/*    className="flex justify-between items-center border-b-2 border-gray-100 py-6 md:justify-start md:space-x-10">*/}
                 
-                <StyledEngineProvider injectFirst>
-                    <ThemeProvider theme={theme}>
  
                         { 
                            events .map(({type, icon, info}) => {
@@ -105,9 +103,7 @@ const EventsContainer: React.FC<Props> = ({authService, notificationsService}) =
                         <Event type={"HIDE"} state={notificationsService.state} send={notificationsService.send} icon={'remove'} info={'Hide Logger'}/>
 
 */}
-                    </ThemeProvider>
-                </StyledEngineProvider>
-             </Box>
+              </Box>
         </AppBar>
     );
 };

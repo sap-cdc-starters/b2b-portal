@@ -10,7 +10,22 @@ export const withGigya = (authMachine: AuthMachine) => authMachine.withContext({
 }).withConfig({
     services: {
         loader: (context, event) => loader,
+        registerOrganization: (ctx, event) => (send) => {
+            const payload = omit("type", event);
+            const context = omit("service", ctx);
+            const show = async (payload: any) => {
+                try{
+                    const response=await ctx.service.showScreenSetAsync(payload);
+                    send({type: "ORGANIZATION.REGISTER.SUCCESS", organization:response});
 
+                }
+                catch (e) {
+                    send({type: "ORGANIZATION.REGISTER.ERROR", error:e});
+                }
+            }
+            // @ts-ignore
+            return show({containerID: context.container,screenSet: `${event.prefix || 'Default'}-OrganizationRegistration` , ...payload})                ;
+        },
         showLogin: (ctx, event) => {
             const payload = omit("type", event);
             const context = omit("service", ctx);
