@@ -3,7 +3,7 @@ import {AnyState} from "xstate";
 import {PortalApplicationRef} from "../machines/portalApplication";
 import {NotificationsService} from "../machines/notificationsMachine";
 import {isUpdateType, useAppLogger} from "../logger/useApplicationLogger";
-import {Icon, ListItemIcon } from "@mui/material";
+import {Icon, ListItemIcon} from "@mui/material";
 
 const rolesSelector = (state: AnyState) => state?.context?.roles;
 const assetsSelector = (state: AnyState) => state?.context?.assets;
@@ -13,7 +13,7 @@ export function ApplicationCard({
                                     notificationsService
                                 }: { app: PortalApplicationRef, notificationsService: NotificationsService }) {
 
-    const {name, info, icon, href} = app;
+    const {name, info, icon, link} = app;
     const assets = useSelector(app.machine, assetsSelector);
     useAppLogger(app.machine, notificationsService.send);
 
@@ -22,9 +22,9 @@ export function ApplicationCard({
             className="column is-one-fifth-fullhd is-one-quarter-widescreen is-one-third-desktop is-one-third-tablet is-half-mobile">
             <div className="brand-card">
                 <div className="product-actions">
-                    <a href={href} target="_blank">
-                        <ListItemIcon >
-                            <Icon baseClassName="material-icons material-icons-outlined">open_in_new</Icon> 
+                    <a {...(link || {href: "#"})}>
+                        <ListItemIcon>
+                            <Icon baseClassName="material-icons material-icons-outlined">open_in_new</Icon>
                         </ListItemIcon>
                     </a>
                 </div>
@@ -40,7 +40,7 @@ export function ApplicationCard({
                     )
                 )
                 }
-               
+
             </div>
         </div>
 

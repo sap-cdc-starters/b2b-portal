@@ -12,7 +12,10 @@ export   interface PortalApplication {
   name: string;
   info?: string;
   logo?: string;
-  href?: string;
+  link?: {
+    href:string,
+    target?:string
+  }& AnyRecord;
   action?: string;
 }
 

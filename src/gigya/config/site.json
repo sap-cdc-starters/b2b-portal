@@ -28,18 +28,25 @@
     "Marketplace":{
         "logo": "storefront",
         "action": "GO_TO_STORE",
-        "href": "https://gigyademo.com/cdc-starter-kit/"
+        "link": {
+            "href":"https://gigyademo.com/cdc-starter-kit/",
+            "target":"_blank"
+        }
 
     } , 
     "Manage_your_Account":{
         "logo": "manage_accounts",
         "action": "GO_TO_ACCOUNT",
-        "href":"#profile"
+        "link": {
+            "href":"#profile"
+        }
 
     },
     "Manuals":{
         "logo": "admin_panel_settings",
         "action": "GO_TO_MANUALS",
-        "href":"#manuals"
+        "link": {
+            "href":"#manuals"
+        }
     } 
 }
