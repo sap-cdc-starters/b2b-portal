@@ -1,13 +1,15 @@
 import React from "react";
 import makeStyles from '@mui/styles/makeStyles';
-import { RouteComponentProps } from "@reach/router";
-import { AuthService } from "../machines/authMachine";
-import { AnyState } from "xstate";
-import { Box } from "@mui/material";
+import {RouteComponentProps} from "@reach/router";
+import {AuthService} from "../machines/authMachine";
+import {AnyState} from "xstate";
+import {Box} from "@mui/material";
 import SessionInfo from "../components/Session";
 import Profile from "../components/Profile";
 import Apps from "../components/Apps";
-import { NotificationsService } from "../machines/notificationsMachine";
+import {NotificationsService} from "../machines/notificationsMachine";
+import ActionsContainer from "./ActionsContainer";
+import MangeAccount from "../components/AccountManage";
 
 const useStyles = makeStyles((theme) => ({
     box: {
@@ -62,7 +64,7 @@ export interface ProfileProps extends RouteComponentProps {
 
 const profileSelector = (state: AnyState) => state?.context?.user;
 
-function ProfileContainer({ authService, notificationsService }: ProfileProps) {
+function ProfileContainer({authService, notificationsService}: ProfileProps) {
     const classes = useStyles();
 
 
@@ -78,12 +80,18 @@ function ProfileContainer({ authService, notificationsService }: ProfileProps) {
 
             <div className="shop-header">
                 <div className="container">
-                    <Profile authService={authService} />
-                </div></div>
+                    <Profile authService={authService}/>
+                </div>
+            </div>
             <div className="store-sections">
                 <div className="container">
-                    <Apps authService={authService} notificationsService={notificationsService} />
+                    <Apps authService={authService} notificationsService={notificationsService}/>
                 </div>
+            </div>
+            <div className="shop-footer">
+            <div >
+               <MangeAccount authService={authService}/>
+            </div>
             </div>
         </Box>
     );

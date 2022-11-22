@@ -152,30 +152,50 @@ function showSelfRegistration() {
     }
 }
 
-export async function showScreenSetAsync(args: any){
-    return new Promise((resolve, reject) => {
- 
-        gigyaWebSDK().accounts.showScreenSet(
+export  function showScreenSetAsync(args: any){
+      return new Promise((resolve, reject) => {
+        console.log('about to open screen set', args);
+     
+
+        gigya.accounts.showScreenSet(
             {
                  ...args,
+                onHide: (response) => {
+                    if (response.errorCode === 0) {
+                        resolve(response);
+
+                    }
+                    if (response.errorCode !== 0) {
+                        console.error(response);
+                        reject(
+                            response
+                        );
+                    }
+                },
                 onAfterSubmit: (response) => {
                     if (response.errorCode === 0) {
                         resolve(response);
 
                     }
                     if (response.errorCode !== 0) {
+                        console.error(response);
                         reject(
                             response
                         );
                     }
                 },
-                onError: reject,
+                onError: (error)=> {
+                    console.error(response);
+                    reject(error)},
                  callback: (response) => {
                     if (response.errorCode === 0) {
                         resolve(response);
 
                     }
                     if (response.errorCode !== 0) {
+
+                        console.error(response);
+
                         reject(
                             response
                         );

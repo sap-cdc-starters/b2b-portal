@@ -33,11 +33,14 @@ export function gigyaAppMachine(app: PortalApplication, { user,  service}:{ user
                 const payload = {...event, ...data};
                 const {action} = payload;
                 if(action === "OPEN_DELEGATED_ADMIN"){
-                   return  ctx.service.openDelegatedAdminAsync({orgId: ctx.org});
+                   return ctx.service.openDelegatedAdminAsync({orgId: ctx.org});
                 }
 
                 if(action === "GO_TO_ACCOUNT"){
-                    return  ctx.service.showScreenSetAsync(payload);
+                    return ctx.service.showScreenSetAsync({...payload, 
+                        screenSet: "Default-ProfileUpdate",
+                         containerID: "edit_profile_placeholder",
+                    });
                 }
                 
                  

@@ -39,18 +39,18 @@ export interface ProfileProps {
 const profileSelector = (state: AnyState) => state?.context?.user;
 
 function Profile({ authService }: ProfileProps) {
-    const classes = useStyles();
+    const classNamees = useStyles();
     const { email, loginProvider, nickname, photo, organization } = useSelector(authService, profileSelector) || {};
 
 
     return (
-        <Paper className={classes.paper} >
+        <Paper className={classNamees.paper} >
             <Typography component="h2" variant="h6" color="primary" gutterBottom>
                 Profile Details
             </Typography>
-            <Avatar src={photo} className={classes.avatar}></Avatar>
+            <Avatar src={photo} className={classNamees.avatar}></Avatar>
             <div
-                className={classes.form}
+                className={classNamees.form}
 
 
             >
