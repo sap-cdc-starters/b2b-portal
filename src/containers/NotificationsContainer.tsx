@@ -7,7 +7,7 @@ import {AuthService} from "../machines/authMachine";
 import {NotificationResponseItem, NotificationsEvents, NotificationsService} from "../machines/notificationsMachine";
 import {omit} from "lodash/fp";
 import {useActor, useSelector} from "@xstate/react";
-import {AppMachine} from "../machines/appMachine";
+import {AppMachine, AppService} from "../machines/appMachine";
 import {ErrorBoundary} from "../logger/NotificationListItem";
 import {isUpdateType, useAppLogger} from "../logger/useApplicationLogger";
 
@@ -96,9 +96,9 @@ const emptySubscriber = {
 const NotificationsContainer: React.FC<Props> = ({authService, notificationsService}) => {
     const classes = useStyles();
     const [notificationsState, sendNotifications] = useActor(notificationsService);
-    const app = useSelector(authService, appSelector, compareApp) || emptySubscriber;
+    const app = useSelector(authService, appSelector, compareApp) ;
     // const apps = useSelector(app, appsSelector) || [];
-    useAppLogger(app, sendNotifications);
+    useAppLogger(app as unknown as AppService, sendNotifications);
 
 
     function getType(state: AnyState) {
@@ -115,11 +115,11 @@ const NotificationsContainer: React.FC<Props> = ({authService, notificationsServ
             sendNotifications({
                 type: "ADD", notification: {
                     id: generateUniqueID(),
-                    title: `${(getType(state))}`,
-                    summary: `state: ${state.value}`,
+                    title: `${state.value}`,
+                    severity: 'success',
+                    summary: `event: ${getType(state)}`,
                     group: 'auth',
                     icon: 'login',
-                    severity: 'info',
                     payload: getPayload(state.event),
                     ...doneDetails(state.event),
                     ...errorDetails(state.event)

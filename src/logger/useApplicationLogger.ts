@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import {ActionTypes, ActorRef, AnyEventObject, AnyState } from "xstate";
-import {AppMachine} from "../machines/appMachine";
+import { AppService} from "../machines/appMachine";
 import {NotificationResponseItem, NotificationsEvents} from "../machines/notificationsMachine";
 import { omit } from "lodash/fp";
 
@@ -56,7 +56,7 @@ function errorDetails(event: AnyEventObject): Partial<NotificationResponseItem> 
 
 
 
-export function useAppLogger(app: ActorRef<AppMachine>, send: (notification: NotificationsEvents) => {}) {
+export function useAppLogger(app: AppService, send: (notification: NotificationsEvents) => {}) {
     useEffect(() => {
         if(app){
             const subscriptions =
@@ -72,7 +72,7 @@ export function useAppLogger(app: ActorRef<AppMachine>, send: (notification: Not
 
     return true;
 
-    function subscribeApp(app: ActorRef<AppMachine>, send: (notification: NotificationsEvents) => {}) {
+    function subscribeApp(app:AppService, send: (notification: NotificationsEvents) => {}) {
         return app?.subscribe && app.subscribe((state: AnyState) => {
             if (!state || isUpdateType(state)) return;
             console.log(state);
@@ -80,11 +80,11 @@ export function useAppLogger(app: ActorRef<AppMachine>, send: (notification: Not
             send({
                 type: "ADD", notification: {
                     id: generateUniqueID(),
-                    title: `${state.value.toString().toLowerCase()}`,
+                    title: `${state.value}`,
                     severity: 'success',
                     group: `${state.context.app.name}`,
                     icon: state.context.app?.logo || 'manage_accounts' ,
-                    summary: `assets: ${state.context.assets?.length || '0'}`,
+                    summary: `event: ${state.event.type.toString().toLowerCase()} ${state.context.assets?.length && `assets: ${state.context.assets.length}` || ''}`,
                     payload: getPayload(state.event),
                     ...doneDetails(state.event),
                     ...errorDetails(state.event)

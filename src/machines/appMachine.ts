@@ -1,4 +1,4 @@
-import {Machine, assign, InterpreterFrom, actions, ContextFrom, EventFrom, send} from "xstate";
+import { actions, ContextFrom, EventFrom, send, SpawnedActorRef, EmittedFrom, ActorRefFrom} from "xstate";
 import {User, IdToken, PortalApplication} from "../models";
 
 const {log} = actions;
@@ -35,7 +35,6 @@ export const appModel = createModel(
 export const appMachine = appModel.createMachine(
     {
         predictableActionArguments: true,
-        id: "appStateMachine",
         context: appModel.initialContext,
         initial: "fetchAssets",
 
@@ -49,7 +48,7 @@ export const appMachine = appModel.createMachine(
             {
                 fetchAssets: {
                     invoke: {
-                        id: "authMachine-fetchAssets",
+                        id: "app-fetchAssets",
                         src: "fetchAssets",
                         data: {
                             appId: (ctx: { id: string }) => ctx.id
@@ -73,18 +72,37 @@ export const appMachine = appModel.createMachine(
                 },
 
                 withAssets: {
+                    on: {
+                        OPEN: {
+                            target: 'opening'
+                        }
+                    },
                     entry: ['onAssets']
                 },
                 noAssets: {
                     entry: ['onNoAssets']
-                }
+                },
+                opening: {
+                    entry: ['openEntry'],
+                    invoke: {
+                        src: "open",
+                        data: {
+                            action: (ctx: { action: string }) => ctx.action,
+                            assets: (ctx: { assets: Assets }) => ctx.assets
+                        },
+                        onDone: 'opened',
+                        onError: {target: 'error', actions: ['assignError']},
+                    }
+                },
+                opened: {},
+                error: {}
             }
 
-    },{
-        actions:{
+    }, {
+        actions: {
             assignAssets:
                 appModel.assign({
-                    assets: (_:any, ev:Assets) => ev.assets,
+                    assets: (_: any, ev: Assets) => ev.assets,
                 })
         }
     }
@@ -96,4 +114,4 @@ export type AppMachineContext = ContextFrom<AppMachine>;
 // export type AuthMachineContext =typeof appModel.initialContext;
 export type AppMachineEvents = EventFrom<AppMachine>;
 
-export type AppService = InterpreterFrom<AppMachine>;
+export type AppService =  ActorRefFrom< typeof appMachine>;

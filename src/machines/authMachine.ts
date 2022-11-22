@@ -1,4 +1,11 @@
-import {Machine, assign, InterpreterFrom, actions, ContextFrom, EventFrom, send, ActorRef} from "xstate";
+import {
+    InterpreterFrom,
+    actions,
+    ContextFrom,
+    EventFrom,
+    send,
+    AnyActorRef
+} from "xstate";
 import {User, IdToken} from "../models";
 
 const {log} = actions;
@@ -12,7 +19,7 @@ export interface SocialPayload {
 
 import {createModel} from "xstate/lib/model"
 import {Account} from "../gigya/models";
-import {appMachine} from "./appMachine";
+import {AppService} from "./appMachine";
 
 export interface Token {
     access_token?: string;
@@ -20,7 +27,7 @@ export interface Token {
     id_token?: string;
 }
 
-  declare type AnyRecord = {
+declare type AnyRecord = {
     [key: string]: any
 }
 declare type Error = AnyRecord | any;
@@ -29,7 +36,7 @@ export const authModel = createModel(
     {
         user: undefined as User | undefined,
         assets: undefined as AnyRecord[] | undefined,
-        app: undefined as ActorRef<any> | undefined,
+        app: undefined as AppService  | undefined,
         organizations: undefined as AnyRecord[] | undefined,
         token: undefined as Token | undefined,
         service: undefined as any | undefined,
@@ -56,6 +63,8 @@ export const authModel = createModel(
         },
     }
 )
+
+
 export const authMachine = authModel.createMachine(
     {
         predictableActionArguments: true,
@@ -248,7 +257,10 @@ export const authMachine = authModel.createMachine(
         },
         services:
             {
-                application: (ctx, ev) => ctx.app || appMachine
+                application: (context, event) => {
+                    return context.app as AnyActorRef;
+                }
+
 
             }
     }

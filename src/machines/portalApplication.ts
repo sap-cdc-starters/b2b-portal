@@ -1,10 +1,10 @@
 import {AnyRecord, PortalApplication} from "../models";
-import {AppMachine, appModel, Assets} from "./appMachine";
+import {AppMachine, appModel, AppService, Assets} from "./appMachine";
 import {GigyaSdk} from "../gigya/gigyaLoadMachine";
 import {gigyaAppMachine} from "./gigyaAppMachine";
 import { ActorRef, spawn } from "xstate";
 export   type PortalApplicationRef = PortalApplication & {
-    machine: ActorRef<AppMachine>
+    machine: AppService
 }
 // export   type PortalApplicationRef =   PortalApplication & ActorRef<AppMachine>;
 
@@ -50,7 +50,7 @@ function enrichLocalSettings(service: GigyaSdk) {
 
 export function portalApplicationMachine(app: AppMachine): AppMachine {
     return app.withConfig({
-        actions: {
+        actions: { 
             onAssets: appModel.assign({
                 apps: (ctx: { assets: Assets, service: GigyaSdk }, ev: any) =>
                     toApps(ctx.assets)
