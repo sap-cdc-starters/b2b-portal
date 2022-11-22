@@ -1,14 +1,13 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import Avatar from "@mui/material/Avatar";
 import makeStyles from '@mui/styles/makeStyles';
-import {AuthService} from "../machines/authMachine";
-import {useActor, useSelector} from "@xstate/react";
-import {AnyState} from "xstate";
-import {Box, Paper, Typography} from "@mui/material";
+import { AuthService } from "../machines/authMachine";
+import { useActor, useSelector } from "@xstate/react";
+import { AnyState } from "xstate";
+import { Box, Paper, Typography } from "@mui/material";
 
 const useStyles = makeStyles((theme) => ({
     paper: {
-        marginTop: theme.spacing(8),
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -39,9 +38,9 @@ export interface ProfileProps {
 
 const profileSelector = (state: AnyState) => state?.context?.user;
 
-function Profile({authService}: ProfileProps) {
+function Profile({ authService }: ProfileProps) {
     const classes = useStyles();
-    const {email, loginProvider, nickname, photo, organization} = useSelector(authService, profileSelector) || {};
+    const { email, loginProvider, nickname, photo, organization } = useSelector(authService, profileSelector) || {};
 
 
     return (
@@ -56,16 +55,16 @@ function Profile({authService}: ProfileProps) {
 
             >
                 <p>
-                    Welcome back, <span style={{fontWeight: "bold"}}> {nickname}</span>.
+                    Welcome back, <span style={{ fontWeight: "bold" }}> {nickname}</span>.
                 </p>
                 <p>
                     You logged in using the email address:
-                    <span style={{fontWeight: "bold"}}> {email}</span>.
+                    <span style={{ fontWeight: "bold" }}> {email}</span>.
                 </p>
                 {/* Switch statement here based on loginProvider */}
                 {organization && <p>
                     to Organiztion
-                    <span style={{fontWeight: "bold"}}> {organization?.orgName}</span>.
+                    <span style={{ fontWeight: "bold" }}> {organization?.orgName}</span>.
                 </p>}
 
             </div>

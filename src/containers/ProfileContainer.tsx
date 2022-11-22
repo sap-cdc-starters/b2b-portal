@@ -7,7 +7,7 @@ import { Box } from "@mui/material";
 import SessionInfo from "../components/Session";
 import Profile from "../components/Profile";
 import Apps from "../components/Apps";
-import {NotificationsService} from "../machines/notificationsMachine";
+import { NotificationsService } from "../machines/notificationsMachine";
 
 const useStyles = makeStyles((theme) => ({
     box: {
@@ -71,7 +71,8 @@ function ProfileContainer({ authService, notificationsService }: ProfileProps) {
             sx={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                flexDirection: "column"
+                flexDirection: "column",
+                marginTop: "20px"
             }}
         >
 
