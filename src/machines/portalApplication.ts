@@ -35,11 +35,14 @@ function appWithRole(app: AppMachine) {
     );
 }*/
 
-function addLogo(service: GigyaSdk) {
+function enrichLocalSettings(service: GigyaSdk) {
     return (app:PortalApplication)=>{
+        console.log(app.name.replaceAll( " ", "_"))
+        console.log(app.name)
+
         return {
             ...app,
-            logo: service.config[app.name]?.icon || service.config[app.name.replace("_", " ")]?.icon
+             ...(service.config[app.name] || service.config[app.name.replaceAll( " ", "_")])
         
     }}
     
@@ -51,7 +54,7 @@ export function portalApplicationMachine(app: AppMachine): AppMachine {
             onAssets: appModel.assign({
                 apps: (ctx: { assets: Assets, service: GigyaSdk }, ev: any) =>
                     toApps(ctx.assets)
-                        .map(addLogo(ctx.service))
+                        .map(enrichLocalSettings(ctx.service))
                         .map(app => {
                             return { 
                                 machine:spawn(appWithRole(gigyaAppMachine(app, ctx.service)), {sync: true, name:app.name}),

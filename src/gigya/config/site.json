@@ -22,18 +22,24 @@
 
     },
     "Delegated Admin":{
-        "icon": "group_add"
+        "logo": "group_add",
+        "action": "OPEN_DELEGATED_ADMIN"
     } ,
     "Marketplace":{
-        "icon": "storefront"
-    } ,
-    "Manage your Account":{
-        "icon": "manage_accounts"
-    },
+        "logo": "storefront",
+        "action": "GO_TO_STORE",
+        "href": "https://gigyademo.com/cdc-starter-kit/"
+
+    } , 
     "Manage_your_Account":{
-        "icon": "manage_accounts"
+        "logo": "manage_accounts",
+        "action": "GO_TO_ACCOUNT",
+        "href":"#profile"
+
     },
     "Manuals":{
-        "icon": "admin_panel_settings"
+        "logo": "admin_panel_settings",
+        "action": "GO_TO_MANUALS",
+        "href":"#manuals"
     } 
 }

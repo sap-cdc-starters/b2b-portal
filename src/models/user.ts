@@ -12,6 +12,8 @@ export   interface PortalApplication {
   name: string;
   info?: string;
   logo?: string;
+  href?: string;
+  action?: string;
 }
 
 export interface IdToken {
