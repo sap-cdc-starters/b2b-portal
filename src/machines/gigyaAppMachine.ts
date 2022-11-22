@@ -1,10 +1,10 @@
 import {GigyaSdk} from "../gigya/gigyaLoadMachine";
 import {appMachine, AppMachine, appModel, Assets} from "./appMachine";
 import {omit} from "lodash/fp";
-import {AnyRecord, PortalApplication} from "../models";
+import {AnyRecord, PortalApplication, User} from "../models";
 import {spawn} from "xstate";
 
-export function gigyaAppMachine(app: PortalApplication, service: GigyaSdk): AppMachine {
+export function gigyaAppMachine(app: PortalApplication, { user,  service}:{ user?:User , service: GigyaSdk}): AppMachine {
     return appMachine.withContext({
         id: app.id,
         service: service,

@@ -107,7 +107,7 @@ export const withGigya = (authMachine: AuthMachine) => authMachine.withContext({
         }),
         onLoggedIn: authModel.assign({
             app: (ctx,e)=>  spawn(
-                portalApplicationMachine(gigyaAppMachine(ctx.service.config.portal, ctx.service))
+                portalApplicationMachine(gigyaAppMachine(ctx.service.config.portal, {service:ctx.service, user:ctx.user}))
            , { sync: true } )
         }),
     }

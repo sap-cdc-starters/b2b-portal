@@ -1,4 +1,4 @@
-import {AnyRecord, PortalApplication} from "../models";
+import {AnyRecord, PortalApplication, User} from "../models";
 import {AppMachine, appModel, AppService, Assets} from "./appMachine";
 import {GigyaSdk} from "../gigya/gigyaLoadMachine";
 import {gigyaAppMachine} from "./gigyaAppMachine";
@@ -52,12 +52,12 @@ export function portalApplicationMachine(app: AppMachine): AppMachine {
     return app.withConfig({
         actions: { 
             onAssets: appModel.assign({
-                apps: (ctx: { assets: Assets, service: GigyaSdk }, ev: any) =>
+                apps: (ctx: { assets: Assets, service: GigyaSdk , user:User}, ev: any) =>
                     toApps(ctx.assets)
                         .map(enrichLocalSettings(ctx.service))
                         .map(app => {
                             return { 
-                                machine:spawn(appWithRole(gigyaAppMachine(app, ctx.service)), {sync: true, name:app.name}),
+                                machine:spawn(appWithRole(gigyaAppMachine(app, ctx)), {sync: true, name:app.name}),
                                 ...app
                             } ;
                             
