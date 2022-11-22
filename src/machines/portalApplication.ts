@@ -3,6 +3,7 @@ import {AppMachine, appModel, AppService, Assets} from "./appMachine";
 import {GigyaSdk} from "../gigya/gigyaLoadMachine";
 import {gigyaAppMachine} from "./gigyaAppMachine";
 import { ActorRef, spawn } from "xstate";
+
 export   type PortalApplicationRef = PortalApplication & {
     machine: AppService
 }
@@ -80,11 +81,20 @@ function toApps(assets: {
     } & AnyRecord
 }[]): PortalApplication[] {
 
-    return assets.filter(a => a.type === 'Portal Applications').map(e => {
+
+    const portalApps= assets.filter(a => a.type === 'Portal Applications').map(e => {
 
         return {name: e.path, id: firstOrValue(e.attributes.App), icon: firstOrValue(e.attributes.icon)}
 
-    })
+    });
+
+    const delegated = assets
+        .filter(e => e.attributes['Response Value'] && firstOrValue(e.attributes['Response Value'])  ==='delegated_admin')
+        .map(e => {
+            return {name: "Delegated Admin", id: "PBZHUUUXRMQMHMBK8AHX",  icon: firstOrValue(e.attributes.icon) || 'delegated.png'}}
+        );
+
+    return [...portalApps, ...delegated]
 }
 
 function toFn(assets: {

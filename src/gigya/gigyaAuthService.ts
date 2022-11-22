@@ -341,14 +341,20 @@ async function getAssets(appId) {
 }
 
 export async function getApps(appId) {
-    try {
-
-
+    try { 
         const assets = await getAssets(appId || config.appId);
-        return assets.filter(a => a.type === 'Portal Applications').map(e => {
-            return {name: e.path, id: e.attributes?.app, ...(e.attributes || {})}
-        })
-    } catch (ex) {
+       
+        const portalApps= assets.filter(a => a.type === 'Portal Applications').map(e => {
+            return {name: e.path, id: e.attributes?.app, ...(e.attributes || {})}});
+        
+        const delegated = assets
+            .filter(e => e.attributes && e.attributes['Response Value'] && e.attributes['Response Value'][0] ==='delegated_admin')
+            .map(e => {
+            return {name: "Delegated Admin", id: "PBZHUUUXRMQMHMBK8AHX", ...(e.attributes || {})}});
+            
+          return portalApps.contact(delegated);
+        }
+    catch (ex) {
         console.log(ex);
         return [{
             id: "ssd",
