@@ -21,7 +21,11 @@
         "logo" : "web"
 
     },
-    "Delegated Admin":{
+    "Delegated_Admin":{
+        "logo": "group_add",
+        "action": "OPEN_DELEGATED_ADMIN"
+    } ,   
+    "Organization_Management":{
         "logo": "group_add",
         "action": "OPEN_DELEGATED_ADMIN"
     } ,

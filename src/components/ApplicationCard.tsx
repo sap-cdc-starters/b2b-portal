@@ -31,9 +31,11 @@ export function ApplicationCard({
                     }
                     {
                         action && (
-                            <ListItemIcon onClick={()=>app.machine.send({type: 'OPEN', action:action})}>
-                                <Icon baseClassName="material-icons material-icons-outlined">open_in_new</Icon>
-                            </ListItemIcon>
+                            <a href={"#"}>
+                                <ListItemIcon onClick={() => app.machine.send({type: 'OPEN', action: action})}>
+                                    <Icon baseClassName="material-icons material-icons-outlined">open_in_new</Icon>
+                                </ListItemIcon>
+                            </a>
                         )
                     }
                 </div>
@@ -42,7 +44,7 @@ export function ApplicationCard({
                     <h3>{name}</h3>
                     <p>{info}</p>
                 </div>
-                {assets && assets.map((role: { path: string, type: string }) =>
+                {assets && assets.filter((ass: { type: string })=>ass.type && ass.type.indexOf('Roles') > -1).map((role: { path: string, type: string }) =>
                     (<div className="product-actions" key={role.path}>
                             <span>{role.path}</span>
                         </div>
