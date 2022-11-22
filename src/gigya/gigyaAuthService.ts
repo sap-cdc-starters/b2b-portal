@@ -2,6 +2,7 @@
 import gigyaWebSDK from "./gigyaWebSDK";
 import {SocialPayload} from "../machines/authMachine";
 import {Account, ErrorEventHandler, IErrorEvent} from "./models";
+import {AnyRecord} from "../models";
 
 // @ts-ignore
 
@@ -254,7 +255,30 @@ export function getAccount(args ={}): Promise<Account> {
         })
     });
 }
+export async function getAssetsAsync(args: AnyRecord & { appId:string}) {
 
+    return new Promise((resolve, reject) => {
+        gigya.accounts.b2b.auth.getAssets({
+            ...args,
+            callback: function (response) {
+                console.log(response);
+                if (response.errorCode === 0) {
+                    resolve(response);
+
+                }
+                if (response.errorCode !== 0) {
+                    reject(
+                        response
+                    );
+
+                }
+            }
+        });
+    });
+    //get portal application assets
+
+
+}
 
 async function getAssets(appId) {
 
@@ -301,9 +325,7 @@ export async function getApps(appId) {
     }
 }
 
-function toApps(response) {
-    return response.allowedAssets.filter(a=> a.type ==='Portal Applications').map(e=> {return {name:e.path, id: e.attributes?.app ,...(e.attributes || {})} });
-}
+
 
 export type LoginParams = {
     [key: string]: any

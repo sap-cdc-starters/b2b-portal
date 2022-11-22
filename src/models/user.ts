@@ -3,6 +3,16 @@ export enum DefaultPrivacyLevel {
   private = "private",
   contacts = "contacts",
 }
+export declare type AnyRecord = {
+  [key: string]: any
+}
+export   interface PortalApplication {
+  id: string;
+  icon?: string;
+  name: string;
+  info?: string;
+  logo?: string;
+}
 
 export interface IdToken {
   raw: string

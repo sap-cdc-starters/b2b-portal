@@ -1,4 +1,4 @@
-import {Machine, assign, InterpreterFrom, actions, ContextFrom, EventFrom, send} from "xstate";
+import {Machine, assign, InterpreterFrom, actions, ContextFrom, EventFrom, send, ActorRef} from "xstate";
 import {User, IdToken} from "../models";
 
 const {log} = actions;
@@ -12,6 +12,7 @@ export interface SocialPayload {
 
 import {createModel} from "xstate/lib/model"
 import {Account} from "../gigya/models";
+import {appMachine} from "./appMachine";
 
 export interface Token {
     access_token?: string;
@@ -19,33 +20,38 @@ export interface Token {
     id_token?: string;
 }
 
-declare type AnyRecord = {
+  declare type AnyRecord = {
     [key: string]: any
 }
+declare type Error = AnyRecord | any;
 
 export const authModel = createModel(
     {
         user: undefined as User | undefined,
+        assets: undefined as AnyRecord[] | undefined,
+        app: undefined as ActorRef<any> | undefined,
+        organizations: undefined as AnyRecord[] | undefined,
         token: undefined as Token | undefined,
         service: undefined as any | undefined,
         container: 'container',
         loader: undefined as any | undefined,
-        error: undefined as any | undefined
-
+        error: undefined as Error | undefined,
     },
     {
         events: {
             LOGGED_IN: (user: User) => ({user}),
             LOGGED_OUT: () => ({}),
             ACCOUNT: (user: User) => ({user}),
-            ACCOUNT_MISSING: () => ({}),
+            ACCOUNT_MISSING: (error: Error) => ({error}),
             LOGIN: (containerID: string) => ({containerID}),
             LOGOUT: (containerID: string) => ({containerID}),
             LOADED: (service: any) => ({service}),
-            ERROR: (error: AnyRecord | any) => ({error}),
+            ERROR: (error: Error) => ({error}),
             'ORGANIZATION.REGISTER': (containerID?: string, prefix?: string) => ({containerID, prefix}),
             'ORGANIZATION.REGISTER.SUCCESS': (organization: AnyRecord) => ({organization}),
-            'ORGANIZATION.REGISTER.ERROR': (error: AnyRecord | any) => ({error}),
+            'ORGANIZATION.REGISTER.ERROR': (error: Error) => ({error}),
+            'ASSETS.FOUND': (assets: AnyRecord[], app: string) => ({assets, app}),
+            'ORGANIZATION.FOUND': (organizations: AnyRecord[] | any) => ({organizations})
 
         },
     }
@@ -146,6 +152,12 @@ export const authMachine = authModel.createMachine(
                 },
             },
             loggedIn: {
+                entry: ['onLoggedIn', 'assignApp'],
+                invoke: {
+                    id: "app",
+                    src: "application"
+
+                },
                 on: {
                     LOGOUT: {
                         target: 'logout'
@@ -157,7 +169,7 @@ export const authMachine = authModel.createMachine(
                     authModel.assign({
                         user: (_, ev) => undefined
                     })
-                ], 
+                ],
                 on: {
                     '': [
                         {
@@ -197,12 +209,11 @@ export const authMachine = authModel.createMachine(
                     src: "showLogin",
                     data: {
                         screenSet: (ctx: any, ev: any) => ev.screenSet || "Default-RegistrationLogin",
-                        startScreen: (ctx: any, ev: any, meta:any) => ev.startScreen|| "gigya-login-screen",
-                        ctx: (ctx: any, ev: any, meta:any) => ev.ctx||  "default-login",
+                        startScreen: (ctx: any, ev: any, meta: any) => ev.startScreen || "gigya-login-screen",
+                        ctx: (ctx: any, ev: any, meta: any) => ev.ctx || "default-login",
 
                     },
-                } 
-                
+                }
 
 
             },
@@ -234,7 +245,12 @@ export const authMachine = authModel.createMachine(
             isSignup: (_, _ev) => window && window.location.hash == "#signup",
             isLogin: (_, _ev) => true
 
-        }
+        },
+        services:
+            {
+                application: (ctx, ev) => ctx.app || appMachine
+
+            }
     }
 )
 

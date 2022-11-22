@@ -10,7 +10,6 @@ import {AnyState} from "xstate";
 import {Box, Container, Stack} from "@mui/material";
 import {SnackbarContext, snackbarMachine} from "./machines/snackbarMachine";
 import AlertBar from "./components/AlertBar";
-import {withGigya} from "./machines/withGigya";
 import {notificationMachine} from "./machines/notificationsMachine";
 import NotificationsContainer from "./containers/NotificationsContainer";
 import ProfileContainer from "./containers/ProfileContainer";
@@ -20,7 +19,6 @@ import {PrivateRoute} from "./routes";
 
 import {ThemeProvider, Theme, StyledEngineProvider, createTheme} from '@mui/material/styles';
 
-import makeStyles from '@mui/styles/makeStyles';
 import {AuthContext, AuthProvider} from "./auth/AuthProvider";
 
 
@@ -31,13 +29,25 @@ declare module '@mui/styles/defaultTheme' {
 }
 
 
-const theme = createTheme();
-
-const useStyles = makeStyles((theme) => {
-    root: {
-        // some CSS that accesses the theme
-    }
+const theme = createTheme({
+    typography: {
+        fontFamily: [
+            'Questrial',
+            'sans-serif',
+            '-apple-system',
+            'BlinkMacSystemFont',
+            '"Segoe UI"',
+            'Roboto',
+            '"Helvetica Neue"',
+            'Arial',
+          
+            '"Apple Color Emoji"',
+            '"Segoe UI Emoji"',
+            '"Segoe UI Symbol"',
+        ].join(','),
+    },
 });
+
 
 
 const App = () => {
@@ -116,9 +126,11 @@ const AppWithService = () => {
 
                     <Router>
                         <PrivateRoute default as={ProfileContainer} path={"/"}
-                                      authService={authService}/>
+                                      authService={authService}
+                                      notificationsService={notificationService}
+                        />
                         <SignIn path={"/signin"} authService={authService}/>
-                        <ProfileContainer path="/profile" authService={authService}/>
+                        <ProfileContainer path="/profile" authService={authService} notificationsService={notificationService}/>
 
                     </Router>
                     </Container>

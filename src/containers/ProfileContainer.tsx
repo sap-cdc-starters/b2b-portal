@@ -7,6 +7,7 @@ import { Box } from "@mui/material";
 import SessionInfo from "../components/Session";
 import Profile from "../components/Profile";
 import Apps from "../components/Apps";
+import {NotificationsService} from "../machines/notificationsMachine";
 
 const useStyles = makeStyles((theme) => ({
     box: {
@@ -54,12 +55,14 @@ const useStyles = makeStyles((theme) => ({
 
 export interface ProfileProps extends RouteComponentProps {
     authService: AuthService;
+    notificationsService: NotificationsService,
+
 
 }
 
 const profileSelector = (state: AnyState) => state?.context?.user;
 
-function ProfileContainer({ authService }: ProfileProps) {
+function ProfileContainer({ authService, notificationsService }: ProfileProps) {
     const classes = useStyles();
 
 
@@ -78,7 +81,7 @@ function ProfileContainer({ authService }: ProfileProps) {
                 </div></div>
             <div className="store-sections">
                 <div className="container">
-                    <Apps authService={authService} />
+                    <Apps authService={authService} notificationsService={notificationsService} />
                 </div>
             </div>
         </Box>

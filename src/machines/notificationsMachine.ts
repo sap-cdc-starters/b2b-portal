@@ -8,7 +8,11 @@ const  {assign} =actions;
  export type NotificationResponseItem =ApiNotificationResponseItem &{
      severity?: "success" | "info" | "warning" | "error";
      title: string,
-     id: string
+     id: string,
+     group?: string,
+     icon?: string,
+     summary?: string,
+     info?: string
 
  }
 export interface NotificationsSchema {

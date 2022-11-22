@@ -1,6 +1,6 @@
 import React, {useEffect, useState, createContext, useContext} from "react";
 import {authMachine, AuthService, AuthMachineContext, AuthMachine} from "../machines/authMachine";
-import {withGigya} from "../machines/withGigya";
+import {withGigya} from "../machines/gigyaAuthMachine";
 import {useInterpret} from "@xstate/react";
 
 export const AuthContext = createContext<AuthService>({} as AuthService);

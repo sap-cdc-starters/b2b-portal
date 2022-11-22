@@ -5,35 +5,37 @@ import {
     ThumbUpAltOutlined as LikeIcon,
     Payment as PaymentIcon,
     CommentRounded as CommentIcon,
-    MonetizationOn as MonetizationOnIcon,
+    MonetizationOnOutlined as MonetizationOnIcon,
     ExpandMoreOutlined as ExpandMoreIcon
+
 } from "@mui/icons-material";
 import {
     Button,
     ListItemIcon,
     ListItemText,
-    useTheme,
-    useMediaQuery,
     ListItem,
-    IconButton,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
     DialogTitle,
     DialogContent,
     DialogActions,
     Dialog,
+    ListItemProps,
+    useTheme,
+    Icon,
+    ListSubheader,
+    ListItemButton
 } from "@mui/material";
 
 import makeStyles from '@mui/styles/makeStyles';
 
-import JsonView from "./JsonTreeViewer";
+import JsonView from "../components/JsonTreeViewer";
 import {NotificationResponseItem} from "../machines/notificationsMachine";
+import {ThemeProvider} from "@mui/styles";
 
-export interface NotificationListItemProps {
+export type NotificationListItemProps = {
     notification: NotificationResponseItem;
     updateNotification: Function;
-}
+
+} & ListItemProps
 
 const useStyles = makeStyles({
     card: {
@@ -56,16 +58,21 @@ const useStyles = makeStyles({
 const NotificationListItem: React.FC<NotificationListItemProps> = ({
                                                                        notification,
                                                                        updateNotification,
+                                                                       ...rest
                                                                    }) => {
-    const classes = useStyles();
-    const theme = useTheme();
-    let listItemText = undefined;
-    let listItemIcon = undefined;
-    let listItemJson = undefined;
-    const xsBreakpoint = useMediaQuery(theme.breakpoints.only("xs"))
-    listItemIcon = <MonetizationOnIcon className={classes.green}/>;
-    listItemText = `${notification.title}`;
-    listItemJson = notification.payload;
+
+    const listItemIcon = <MonetizationOnIcon/>;
+
+    const {
+        title,
+        payload,
+        icon,
+        group,
+        severity,
+        summary,
+        info
+
+    } = notification;
 
     const [expended, setExpended] = useState(false);
     const changeExpand = () => {
@@ -74,45 +81,61 @@ const NotificationListItem: React.FC<NotificationListItemProps> = ({
     const handleClose = () => {
         setExpended(false)
     }
-    return (
-        <ListItem data-test={`notification-list-item-${notification.id}`}>
- 
 
-            <Button onClick={changeExpand}>
-                <ListItemIcon>{listItemIcon!}</ListItemIcon>
-                <ListItemText primary={listItemText}/>
-                <ExpandMoreIcon/>
-            </Button>
+    return (
+        // <ThemeProvider theme={theme.palette.success}>
+        <ListItem   {...rest} data-test={`notification-list-item-${notification.id}`}>
+
+            <ListItemButton component={ListItemButton} onClick={changeExpand}>
+                <ListItemIcon >
+                    {(icon && <Icon baseClassName="material-icons material-icons-outlined">{icon}</Icon>
+                    ) || listItemIcon!}
+                </ListItemIcon>
+                
+                <ListItemText primary={title} secondary={summary} about={info}/>
+
+            </ListItemButton>
+
+            {/*<Button onClick={changeExpand} >*/}
+            {/*    <ListItemIcon >*/}
+            {/*        {(icon && <Icon baseClassName="material-icons material-icons-outlined">{icon}</Icon> */}
+            {/*        ) || listItemIcon!}*/}
+            {/*    </ListItemIcon>*/}
+            {/*    <ListItemText primary={title} secondary={summary} about={info}/>*/}
+            {/*    <ExpandMoreIcon/>*/}
+            {/*</Button>*/}
             <Dialog
                 open={expended}
                 onClose={handleClose}
-                scroll={'paper'} 
+                scroll={'paper'}
                 aria-labelledby="scroll-dialog-title"
                 aria-describedby="scroll-dialog-description"
             >
-                <DialogTitle id="scroll-dialog-title">{listItemText}</DialogTitle>
+                <DialogTitle id="scroll-dialog-title">{title}</DialogTitle>
                 <DialogContent dividers={true}>
-                    <ErrorBoundary data={listItemJson} >
-                        <JsonView data={listItemJson} />
+                    <ErrorBoundary data={payload}>
+                        <JsonView data={payload}/>
                     </ErrorBoundary>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={handleClose}>Close</Button>
                 </DialogActions>
             </Dialog>
-         
-        </ListItem>);
+
+        </ListItem>
+        // </ThemeProvider>
+    );
 };
 
-class ErrorBoundary extends React.Component<React.PropsWithChildren<{data?: any}>, {hasError:boolean, error?: string }> {
+export class ErrorBoundary extends React.Component<React.PropsWithChildren<{ data?: any }>, { hasError: boolean, error?: string }> {
     constructor(props: React.PropsWithChildren) {
         super(props);
-        this.state = { hasError: false, error: undefined };
+        this.state = {hasError: false, error: undefined};
     }
 
     static getDerivedStateFromError(error: any) {
         // Update state so the next render will show the fallback UI.
-        return { hasError: true, error:error };
+        return {hasError: true, error: error};
     }
 
     componentDidCatch(error: any, errorInfo: any) {
@@ -132,4 +155,5 @@ class ErrorBoundary extends React.Component<React.PropsWithChildren<{data?: any}
         return this.props.children;
     }
 }
+
 export default NotificationListItem;

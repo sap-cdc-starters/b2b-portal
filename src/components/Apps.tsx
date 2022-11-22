@@ -1,70 +1,37 @@
-import React, { useState } from "react";
-import Avatar from "@mui/material/Avatar";
+import React from "react";
 import makeStyles from '@mui/styles/makeStyles';
-import { AuthService } from "../machines/authMachine";
-import { useActor, useSelector } from "@xstate/react";
-import { AnyState } from "xstate";
-import { Box, List, Paper, Typography } from "@mui/material";
-import { NotificationResponseItem } from "../machines/notificationsMachine";
-import NotificationListItem from "./NotificationListItem";
-import Grid from '@mui/material/Grid';
-import { styled } from '@mui/material/styles';
-
-const Item = styled(Paper)(({ theme }) => ({
-    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-}));
-
-const useStyles = makeStyles((theme) => ({
-    paper: {
-        marginTop: theme.spacing(8),
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-    },
-    avatar: {
-        margin: theme.spacing(1),
-        backgroundColor: theme.palette.secondary.main,
-        width: theme.spacing(12),
-        height: theme.spacing(12),
-    },
-    submit: {
-        margin: theme.spacing(3, 0, 2),
-    },
-    form: {
-        // width: "100%", // Fix IE 11 issue.
-        marginTop: theme.spacing(1),
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-    },
-}));
+import {AuthService} from "../machines/authMachine";
+import {useSelector} from "@xstate/react";
+import {ActorRef, AnyState} from "xstate";
+import {Paper} from "@mui/material";
+import {styled} from '@mui/material/styles';
+import {AppMachine} from "../machines/appMachine";
+import {ApplicationCard} from "./ApplicationCard";
+import {PortalApplicationRef} from "../machines/portalApplication";
+import {NotificationsService} from "../machines/notificationsMachine";
+ 
 
 
 export interface ProfileProps {
     authService: AuthService;
-
+    notificationsService: NotificationsService;
 }
 
-const contextSelector = (state: AnyState) => state?.context?.user;
+const contextSelector = (state: AnyState) => state?.context;
 
-function Apps({ authService }: ProfileProps) {
-    const { apps } = useSelector(authService, contextSelector) || {};
-
-    console.log(apps);
-
+function Apps({ authService, notificationsService }: ProfileProps) {
+    // const { apps } = useSelector(authService, userSelector) || {};
+    const { app } = useSelector(authService, contextSelector) || {};
+    const { apps } = useSelector(app, contextSelector) || {};
+    
     return (
-        <>
-
-
+        <> 
             {apps?.length > 0 ? (
                 <div className="columns is-multiline">
-                    {apps.map((app: App) => (
-                        <App
-                            key={app.id}
+                    {apps.map((app: PortalApplicationRef) => (
+                        <ApplicationCard
+                            notificationsService={notificationsService}
+                            key={app.name}
                             app={app}
                         />
                     ))}
@@ -76,37 +43,7 @@ function Apps({ authService }: ProfileProps) {
     );
 }
 
-interface App {
-    id: string;
-    icon: string;
-    name: string;
-    info: string;
-    role: string;
-}
 
-function App({ app = {
-    id: "ssd",
-    icon: "img/assets/products/1.svg",
-    name: "Marketplace",
-    info: "A beautiful dress for you best evenings and important dates",
-    role: "Buyer"
-} }: { app: App }) {
-    return (
-        <div className="column is-one-fifth-fullhd is-one-quarter-widescreen is-one-third-desktop is-one-third-tablet is-half-mobile">
-            <div className="brand-card">
-                <img src={`/img/${app.icon}`} alt="" />
-                <div className="meta">
-                    <h3>{app.name}</h3>
-                    <p>{app.info}</p>
-                </div>
-                <div className="product-actions">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
-                    <span>{app.role}</span>
-                </div>
-            </div>
-        </div>
-
-    );
-}
+const appsSelector = (app: ActorRef<AppMachine>) => app.getSnapshot().state?.context?.apps;
 
 export default Apps;

@@ -1,12 +1,18 @@
 import {getAccount, getApps} from "../gigya/gigyaAuthService";
 import {omit} from "lodash/fp";
 import {AuthMachine, authModel} from "./authMachine";
-import {gigyaService, loader} from "../gigya/gigyaLoadMachine";
+import {GigyaSdk, gigyaService, loader} from "../gigya/gigyaLoadMachine";
+import {AppMachine, appMachine} from "./appMachine";
+import { spawn } from "xstate";
+import {gigyaAppMachine} from "./gigyaAppMachine";
+import { portalApplicationMachine } from "./portalApplication";
+
 
 
 export const withGigya = (authMachine: AuthMachine) => authMachine.withContext({
     ...authMachine.context,
-    loader: loader
+    loader: loader,
+    
 }).withConfig({
     services: {
         loader: (context, event) => loader,
@@ -62,9 +68,11 @@ export const withGigya = (authMachine: AuthMachine) => authMachine.withContext({
                     send({type: "ACCOUNT", user})
                 })
                 .catch(function (err) {
-                    send("ACCOUNT_MISSING")
+                    send({type: "ACCOUNT_MISSING", error:err})
                 })
         },
+       
+      
         fetchAccountCallback:  (ctx, event) => (callback, onReceive) => {
             // This will send the 'INC' event to the parent every second
             const args = omit("type", event);
@@ -96,9 +104,16 @@ export const withGigya = (authMachine: AuthMachine) => authMachine.withContext({
     actions: {
         assignService: authModel.assign({
             service: (_: any, ev: { type: "LOADED", service: any; }) => ev.service
-        })
+        }),
+        onLoggedIn: authModel.assign({
+            app: (ctx,e)=>  spawn(
+                portalApplicationMachine(gigyaAppMachine(ctx.service.config.portal, ctx.service))
+           , { sync: true } )
+        }),
     }
 });
+
+ 
 
 async function getAccountAsync(payload: any) {
     const account = await getAccount(payload);

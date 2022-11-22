@@ -139,7 +139,7 @@ const gigyaLoadingMachine = gigyaModel.createMachine({
         },
         checker: ({config: GigyaConfig}, event) => (send) => {
             if (checkIfGigyaLoaded()) {
-                send({type: "LOADED", service: sdk()})
+                send({type: "LOADED", service: sdk(config)})
             } else {
                 send({type: "CHECK", wait: 500})
 
@@ -177,7 +177,7 @@ window.onGigyaServiceReady = onGigyaLoaded;
 
 export function onGigyaLoaded() {
 
-    gigyaService.send({type: "LOADED", service: sdk()})
+    gigyaService.send({type: "LOADED", service: sdk(config)})
 
 }
 
@@ -207,7 +207,7 @@ gigyaService.subscribe(state => {
 
 export const loginSubject = new Subject<{type: "LOGGED_IN", user:Partial<UserInfo>}>()  ;
 
-export function sdk(): GigyaSdk {
+export function sdk(config:GigyaConfig): GigyaSdk {
     let onLogin = (event:any)=>{
         loginSubject.next({type: "LOGGED_IN", user:{ ...(event.user?.userInfo || {}),  photo: event.user?.profile?.photoURL}})
 
@@ -217,6 +217,7 @@ export function sdk(): GigyaSdk {
         onLogin: onLogin
     });
     return {
+         config: config,
         ...window.gigya,
         ...gigya,
         loaded: true,

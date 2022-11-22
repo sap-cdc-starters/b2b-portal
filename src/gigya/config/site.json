@@ -13,5 +13,27 @@
     "raas_prefix": "Default",
     "lang": "en",
     "apiKey": "4_4tFAv0nyjFwBctOZOAhSSQ",
-    "app": "PPPQ6CTTUG11IEBA3BMK"
+    "app": "PPPQ6CTTUG11IEBA3BMK",
+    "portal": {
+        "id": "PPPQ6CTTUG11IEBA3BMK",
+        "icon": "web",
+        "name" : "Portal Application",
+        "logo" : "web"
+
+    },
+    "Delegated Admin":{
+        "icon": "group_add"
+    } ,
+    "Marketplace":{
+        "icon": "storefront"
+    } ,
+    "Manage your Account":{
+        "icon": "manage_accounts"
+    },
+    "Manage_your_Account":{
+        "icon": "manage_accounts"
+    },
+    "Manuals":{
+        "icon": "admin_panel_settings"
+    } 
 }
