@@ -1,7 +1,7 @@
 // @ts-nocheck - may need to be at the start of file
 import gigyaWebSDK from "./gigyaWebSDK";
 import {SocialPayload} from "../machines/authMachine";
-import {Account, ErrorEventHandler, IErrorEvent} from "./models";
+import {Account, IBaseEvent, IErrorEvent} from "./models";
 import {AnyRecord} from "../models";
 
 // @ts-ignore
@@ -117,8 +117,22 @@ export  function showLoginScreenSet(args: any, cb?: (account:Account)=> {}, erro
 
    
 }
-function openDelegatedAdmin() {
-    gigya.accounts.b2b.openDelegatedAdminLogin({orgId:getCookie('orgId')});
+export async function openDelegatedAdminAsync(args){
+    return await new Promise((resolve, reject) => {
+
+        gigya.accounts.b2b.openDelegatedAdminLogin({
+            ...(args || {}),
+            onError: reject,
+             callback: function (res) {
+                if (res.errorCode === 0) {
+                    resolve(res)
+                } else {
+                    reject(res)
+                }
+
+            }
+        });
+    })
 }
 
 
@@ -138,7 +152,7 @@ function showSelfRegistration() {
     }
 }
 
-export async function showScreenSetAsync(args: any):Promise<Account> {
+export async function showScreenSetAsync(args: any){
     return new Promise((resolve, reject) => {
  
         gigyaWebSDK().accounts.showScreenSet(
@@ -151,10 +165,11 @@ export async function showScreenSetAsync(args: any):Promise<Account> {
                     }
                     if (response.errorCode !== 0) {
                         reject(
-                            `Error during registration: ${response.errorMessage}, ${response.errorDetails}`
+                            response
                         );
                     }
                 },
+                onError: reject,
                  callback: (response) => {
                     if (response.errorCode === 0) {
                         resolve(response);
@@ -162,7 +177,7 @@ export async function showScreenSetAsync(args: any):Promise<Account> {
                     }
                     if (response.errorCode !== 0) {
                         reject(
-                            `Error during registration: ${response.errorMessage}, ${response.errorDetails}`
+                            response
                         );
                     }
                 },

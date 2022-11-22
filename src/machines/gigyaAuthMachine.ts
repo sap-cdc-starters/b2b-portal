@@ -63,7 +63,7 @@ export const withGigya = (authMachine: AuthMachine) => authMachine.withContext({
         },
         fetchAccount: (ctx, event) => (send) => {
             const payload = omit("type", event);
-            return getAccountAsync(payload)
+            getAccountAsync(payload)
                 .then(function ({user}) { 
                     send({type: "ACCOUNT", user})
                 })
@@ -105,7 +105,7 @@ export const withGigya = (authMachine: AuthMachine) => authMachine.withContext({
         assignService: authModel.assign({
             service: (_: any, ev: { type: "LOADED", service: any; }) => ev.service
         }),
-        onLoggedIn: authModel.assign({
+        assignApp: authModel.assign({
             app: (ctx,e)=>  spawn(
                 portalApplicationMachine(gigyaAppMachine(ctx.service.config.portal, {service:ctx.service, user:ctx.user}))
            , { sync: true } )

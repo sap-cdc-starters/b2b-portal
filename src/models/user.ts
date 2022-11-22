@@ -38,6 +38,7 @@ export interface User {
   defaultPrivacyLevel?: DefaultPrivacyLevel;
   createdAt?: Date;
   modifiedAt?: Date;
+  organization?: Organization
   [key:string]: any
 }
 
@@ -46,4 +47,11 @@ export type UserSettingsPayload = Pick<
   "firstName" | "lastName" | "email" | "phoneNumber" | "defaultPrivacyLevel"
 >;
 
+declare type Organization = {
+  status: string;
+  orgId: string;
+  bpid: string;
+  orgName: string;
+  roles: string[];
+}
  

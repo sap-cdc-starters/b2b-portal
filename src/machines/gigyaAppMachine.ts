@@ -5,13 +5,16 @@ import {AnyRecord, PortalApplication, User} from "../models";
 import {spawn} from "xstate";
 
 export function gigyaAppMachine(app: PortalApplication, { user,  service}:{ user?:User , service: GigyaSdk}): AppMachine {
+    const {orgId} = user?.organization || {};
     return appMachine.withContext({
         id: app.id,
         service: service,
+        user: user,
+        org:orgId,
         app: app,
         error: undefined,
         assets: undefined,
-        action: undefined
+        action: app.action
     }).withConfig({
         services: {
             fetchAssets: (ctx, event) => (send) => {
@@ -25,7 +28,19 @@ export function gigyaAppMachine(app: PortalApplication, { user,  service}:{ user
                     .catch(function (err: any) {
                         send({type: "ERROR", error: err})
                     })
+            },
+            open: (ctx, event, {data})=>{                 
+                if(ctx.app.action === "OPEN_DELEGATED_ADMIN"){
+                   return  ctx.service.openDelegatedAdminAsync({orgId: ctx.org});
+                }
+
+                if(ctx.app.action === "GO_TO_ACCOUNT"){
+                    return  ctx.service.showScreenSetAsync({orgId: ctx.org});
+                }
+                
+                 
             }
+           
         }
     });
 }

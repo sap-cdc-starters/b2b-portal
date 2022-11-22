@@ -39,10 +39,13 @@ export const appMachine = appModel.createMachine(
         initial: "fetchAssets",
 
         on: {
-            "FETCH": {
+            FETCH: {
                 target: "fetchAssets",
 
             },
+            OPEN: {
+                target: 'opening'
+            }
         },
         states:
             {
