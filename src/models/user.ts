@@ -16,7 +16,7 @@ export   interface PortalApplication {
     href:string,
     target?:string
   }& AnyRecord;
-  action?: string;
+  action?: any;
 }
 
 export interface IdToken {

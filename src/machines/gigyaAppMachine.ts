@@ -29,13 +29,15 @@ export function gigyaAppMachine(app: PortalApplication, { user,  service}:{ user
                         send({type: "ERROR", error: err})
                     })
             },
-            open: (ctx, event, {data})=>{                 
-                if(ctx.app.action === "OPEN_DELEGATED_ADMIN"){
+            open: (ctx, event, {data})=>{     
+                const payload = {...event, ...data};
+                const {action} = payload;
+                if(action === "OPEN_DELEGATED_ADMIN"){
                    return  ctx.service.openDelegatedAdminAsync({orgId: ctx.org});
                 }
 
-                if(ctx.app.action === "GO_TO_ACCOUNT"){
-                    return  ctx.service.showScreenSetAsync({orgId: ctx.org});
+                if(action === "GO_TO_ACCOUNT"){
+                    return  ctx.service.showScreenSetAsync(payload);
                 }
                 
                  

@@ -27,7 +27,7 @@ export const appModel = createModel(
             'FETCH': () => ({}),
             'FOUND': (assets: AnyRecord[]) => ({assets}),
             'ERROR': (error: Error) => ({error}),
-            'OPEN': () => ({}),
+            'OPEN': (action:any) => ({action}),
 
         },
     }
@@ -90,7 +90,7 @@ export const appMachine = appModel.createMachine(
                     invoke: {
                         src: "open",
                         data: {
-                            action: (ctx: { action: string }) => ctx.action,
+                            action: (ctx: { action: string }, ev:{action:any}) => ev.action || ctx.action,
                             assets: (ctx: { assets: Assets }) => ctx.assets
                         },
                         onDone: 'opened',
