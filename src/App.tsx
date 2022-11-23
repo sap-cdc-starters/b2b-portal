@@ -7,7 +7,7 @@ import {authMachine, AuthService} from "./machines/authMachine";
 import {Router} from "@reach/router";
 import {useMachine} from "@xstate/react";
 import {AnyState} from "xstate";
-import {Box, Container, Stack} from "@mui/material";
+import {Box, Container, responsiveFontSizes, Stack} from "@mui/material";
 import {SnackbarContext, snackbarMachine} from "./machines/snackbarMachine";
 import AlertBar from "./components/AlertBar";
 import {notificationMachine} from "./machines/notificationsMachine";
@@ -20,6 +20,7 @@ import {PrivateRoute} from "./routes";
 import {ThemeProvider, Theme, StyledEngineProvider, createTheme} from '@mui/material/styles';
 
 import {AuthContext, AuthProvider} from "./auth/AuthProvider";
+import { green, purple } from '@mui/material/colors';
 
 
 declare module '@mui/styles/defaultTheme' {
@@ -27,10 +28,33 @@ declare module '@mui/styles/defaultTheme' {
     interface DefaultTheme extends Theme {
     }
 }
-
-
 const theme = createTheme({
+    palette: {
+        // secondary: {
+        //     main: '#999'
+        // },
+        primary: {
+            main: '#7a7a7a'
+        }
+
+    },
+
     typography: {
+        h5: {
+            font: 'Questrial',
+            fontStyle: 'lighter',
+            fontWeight: 'lighter',
+            fontSize: '14px',
+            fontFamily: "'Questrial', sans-serif !important"
+        },
+        button:{
+            font: 'Questrial',
+            fontStyle: 'lighter',
+            fontWeight: 'lighter',
+            fontFamily: "'Questrial', sans-serif !important",
+            fontSize: '14px',
+            opacity: 0.8
+        },
         fontFamily: [
             'Questrial',
             'sans-serif',
@@ -40,7 +64,7 @@ const theme = createTheme({
             'Roboto',
             '"Helvetica Neue"',
             'Arial',
-          
+
             '"Apple Color Emoji"',
             '"Segoe UI Emoji"',
             '"Segoe UI Symbol"',
@@ -49,36 +73,13 @@ const theme = createTheme({
 });
 
 
-
 const App = () => {
-
-
-    // const gigya = useGigya();
-    // const authService = useInterpretWithLocalStorage(() => withGigya(authMachine));
-
-
-    // authService.subscribe(state => {
-    //     showSnackbar({message: state.value as string, severity: "info" })
-    // })
-
-    /*
-        useEffect(() => {
-            const subscription = authService.subscribe((state: AnyState) => {
-                // simple state logging
-                console.log(state);
-                showSnackbar({message: state.value.toString(), severity: "info"})
-    
-            });
-    
-            return subscription.unsubscribe;
-        }, [authService]);
-    */
-
-    // @ts-ignore
+    const responsiveTheme = responsiveFontSizes(theme);
+ 
     // @ts-ignore
     return (
         <StyledEngineProvider injectFirst>
-            <ThemeProvider theme={theme}>
+            <ThemeProvider theme={responsiveTheme}>
                 <AuthProvider>
                         <AppWithService/>
                 </AuthProvider>
