@@ -1,14 +1,16 @@
- # Gigya - CDC Login
+ # Gigya - CDC B2B Starter
  
- - demosteate common use cases in gigya implememation 
+ - b2b configuration and authorization
  - client side implemantation with Gigya sdk
  
  ## Live site
  
-deployed to https://b2b.cdcs.site/
+Deployed to https://b2b.cdcs.site/
 
   
+![image](https://user-images.githubusercontent.com/29256880/203679994-3c52fe82-72c5-4b3f-a25f-fa9d63d14a75.png)
 
+Insepired by the amazing  https://gigyademo.com/cdc-starter-kit :heart:	
 
 ## Local development
 
@@ -37,5 +39,5 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
  
-## Learn More
+##  More
 
